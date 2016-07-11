@@ -1,0 +1,235 @@
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/polymer/polymer.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-button/paper-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog/paper-dialog.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-input/paper-input.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-card/paper-card.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-fab/paper-fab.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-form/iron-form.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/social-icons.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/maps-icons.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/device-icons.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-header/app-header.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/paper-styles.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/classes/global.html">
+
+<dom-module id="bof-app">
+<template>
+    <style>
+        app-header {
+          background-color: #0078ae;
+          color: #fff;
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+        .flock-card a {
+            font-size: inherit;
+            font-weight: inherit;
+            text-transform: inherit;
+            letter-spacing: inherit;
+            line-height: inherit;
+            text-decoration: underline;
+            color: #777;
+        }
+
+        .flock-card {
+            max-width: 100%;
+            width: 600px;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .flock-card span {
+            vertical-align: middle;
+        }
+
+        .flock-heading {
+            margin-bottom: 1em;
+        }
+
+        .flock-name {
+            font-size: 1.5em;
+        }
+
+        .flock-action {
+            float: right;
+        }
+
+        .flock-description {
+            margin-bottom: 1em;
+        }
+
+        .flock-details {
+            color: #777;
+            font-size: 0.8em;
+            margin-bottom: 1em;
+        }
+
+        .flock-details-group {
+            margin-right: 10px;
+        }
+
+        .flock-card .card-actions {
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .flock-favorite {
+            --paper-fab-background: #fff;
+            --paper-fab-keyboard-focus-background: #eee;
+            color: #777;
+        }
+
+        .flock-favorite[active] {
+            color: red;
+        }
+
+        paper-dialog {
+            max-width: 80%;
+            width: 800px;
+        }
+    </style>
+
+    <iron-ajax
+        auto
+        id="getFlocks"
+        url="/api/flocks"
+        handle-as="json"
+        last-response="{{flocks}}"></iron-ajax>
+
+    <app-header-layout>
+        <app-header effects="waterfall" fixed>
+            <app-toolbar>
+                <img class="logo" src="http://pydata.it/img/logo.png" />
+                <div title>Birds of a Feather</div>
+                <paper-icon-button
+                    id="newFlock"
+                    icon="add-circle-outline">New Flock</paper-icon-button>
+            </app-toolbar>
+        </app-header>
+
+        <div content>
+            <div class="vertical layout">
+                <template is="dom-repeat" items="[[flocks.results]]">
+                    <paper-card class="flock-card" image="">
+                        <div class="card-content">
+                            <div class="flock-heading">
+                                <span class="flock-name">[[item.name]]</span>
+                                <span class="flock-action"><paper-fab mini toggles class="flock-favorite" icon="favorite-border"></paper-fab></span>
+                            </div>
+                            <div class="flock-description">[[item.description]]</div>
+                        </div>
+                        <div class="card-actions">
+                            <div class="flock-details">
+                                <span class="flock-details-group">
+                                    <iron-icon icon="device:access-time"></iron-icon>
+                                    <span>[[item.when]]</span>
+                                </span>
+                                <span class="flock-details-group">
+                                    <iron-icon icon="maps:place"></iron-icon>
+                                    <span>[[item.where]]</span>
+                                </span>
+                                <span class="flock-details-group">
+                                    <iron-icon icon="social:person"></iron-icon>
+                                    <span><a href="https://github.com/[[item.leader]]" target="_blank" rel="noopener noreferrer">[[item.leader]]</a> flew first</span>
+                                </span>
+                            </div>
+                            <div class="flock-details">
+                                <iron-icon icon="social:group"></iron-icon>
+                                <template is="dom-repeat" items="[[item.birds]]">
+                                    <span><a href="https://github.com/[[item]]" target="_blank" rel="noopener noreferrer">[[item]]</a></span>
+                                </template>
+                                <span>will flock</span>
+                            </div>
+                        </div>
+                    </paper-card>
+                </template>
+            </div>
+        </div>
+    </app-header-layout>
+
+    <form is="iron-form"
+          id="form"
+          method="post"
+          action="/api/flocks"
+          content-type="application/json">
+        <paper-dialog id="dialog" modal>
+            <h2>New Flock</h2>
+            <paper-dialog-scrollable>
+                <paper-input name="name"
+                             label="Name your flock"
+                             maxlength="128"
+                             char-counter
+                             autofocus
+                             required></paper-input>
+                <paper-input name="description"
+                             label="Describe the topic"
+                             maxlength="256"
+                             char-counter
+                             required></paper-input>
+                <paper-input name="when"
+                             label="When do you want to meet?"
+                             maxlength="128"
+                             char-counter
+                             required></paper-input>
+                <paper-input name="where"
+                             label="Where do you want to meet?"
+                             maxlength="128"
+                             char-counter
+                             required></paper-input>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button id="accept">Accept</paper-button>
+            </div>
+        </paper-dialog>
+    </form>
+</template>
+
+<script>
+  Polymer({
+    is: 'bof-app',
+    listeners: {
+        'newFlock.tap': 'showForm',
+        'accept.tap': 'onCreateRequest',
+        'form.iron-form-response': 'onCreateResponse',
+        'form.iron-form-error': 'onCreateError'
+    },
+
+    csvList: function(arr) {
+        return arr.join(', ');
+    },
+
+    showForm: function() {
+        this.$.dialog.set('opened', true);
+    },
+
+    onCreateRequest: function(evt) {
+        evt.preventDefault();
+        this.$.form.submit();
+    },
+
+    onCreateResponse: function(evt) {
+        console.log(evt.detail.response);
+        this.$.form.reset();
+        this.$.dialog.set('opened', false);
+    },
+
+    onCreateError: function(evt) {
+        console.error(evt.detail);
+    }
+  });
+  </script>
+</dom-module>
