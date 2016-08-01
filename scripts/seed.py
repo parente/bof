@@ -1,15 +1,16 @@
+import sys
+sys.path.append('../')
 from app import *
 
 db.drop_all()
 db.create_all()
 
+nobody = User('nobody')
+foobar = User('foobar')
 parente = User('parente')
-foo = User('foo')
-bar = User('bar')
 
+db.session.add(nobody)
 db.session.add(parente)
-db.session.add(foo)
-db.session.add(bar)
 db.session.commit()
 
 f1 = Flock(name='Jupyter and Drinks',
@@ -22,13 +23,13 @@ f2 = Flock(name='the life of scipy',
     description="Where are we going next?",
     where='By the front bar',
     when='7 pm',
-    leader=foo)
+    leader=nobody)
 
 db.session.add(f1)
 db.session.add(f2)
 db.session.commit()
 
-f1.birds.append(bar)
-f1.birds.append(parente)
-f2.birds.append(bar)
+f1.birds.append(foobar)
+f1.birds.append(nobody)
+f2.birds.append(foobar)
 db.session.commit()
