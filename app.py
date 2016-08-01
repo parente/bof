@@ -19,7 +19,7 @@ class User(db.Model):
     def __init__(self, username):
         self.username = username
 
-    def to_json(self):
+    def to_dict(self):
         return {
             'username': self.username
         }
@@ -44,7 +44,7 @@ class Flock(db.Model):
         self.when = when
         self.leader = leader
 
-    def to_json(self):
+    def to_dict(self):
         return {
             'name': self.name,
             'description': self.description,
@@ -61,20 +61,50 @@ def index():
 @app.route('/api/flocks')
 def list_flocks():
     flocks = Flock.query.all()
-    return jsonify({'results' : [flock.to_json() for flock in flocks]})
+    return jsonify({'results' : [flock.to_dict() for flock in reversed(flocks)]})
 
 @app.route('/api/flocks', methods=['POST'])
 def create_flock():
     content = request.json
-    print(content)
-    return (jsonify({
-        'id': 1,
-        'link': url_for('delete_flock', fid=1)
-    }), 201)
+
+    # TODO: replace with authed user
+    user = User.query.filter_by(username='nobody').first()
+    print(user)
+
+    flock = Flock(name=content['name'],
+        description=content['description'],
+        where=content['where'],
+        when=content['when'],
+        leader=user
+    )
+    db.session.add(flock)
+    db.session.commit()
+
+    return (jsonify(flock.to_dict()), 201)
+
+@app.route('/api/flocks/<fid>', methods=['PUT'])
+def join_flock(fid):
+    # TODO: also need to support owner modification
+    # TODO: replace with authed user
+    user = User.query.filter_by(username='nobody').first()
+
+    flock = Flock.query.get(fid)
+    flock.birds.append(user)
+    db.session.commit()
+
+    return (jsonify(flock.to_dict()), 200)
 
 @app.route('/api/flocks/<fid>', methods=['DELETE'])
 def delete_flock(fid):
-    return 'TODO: update flock ' + fid
+    # TODO: replace with authed user
+    user = User.query.filter_by(username='nobody').first()
+
+    flock = Flock.query.get(fid)
+    # TODO: check if user has access to delete
+
+    db.session.delete(flock)
+    db.session.commit()
+    return None, 204
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
