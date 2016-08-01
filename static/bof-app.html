@@ -55,6 +55,10 @@
             vertical-align: middle;
         }
 
+        .flock-card paper-fab {
+            display: inline-block;
+        }
+
         .flock-heading {
             margin-bottom: 1em;
         }
@@ -86,14 +90,18 @@
             padding-bottom: 10px;
         }
 
-        .flock-favorite {
+        .flock-fab-button {
             --paper-fab-background: #fff;
             --paper-fab-keyboard-focus-background: #eee;
             color: #777;
         }
 
-        .flock-favorite[active] {
+        .flock-fab-button[active] {
             color: red;
+        }
+
+        .flock-hidden {
+            display: none;
         }
 
         paper-dialog {
@@ -104,7 +112,7 @@
 
     <iron-ajax
         auto
-        id="getFlocks"
+        id="flockList"
         url="/api/flocks"
         handle-as="json"
         last-response="{{flocks}}"></iron-ajax>
@@ -115,58 +123,84 @@
                 <img class="logo" src="http://pydata.it/img/logo.png" />
                 <div title>Birds of a Feather</div>
                 <paper-icon-button
-                    id="newFlock"
-                    icon="add-circle-outline">New Flock</paper-icon-button>
+                    on-tap="onNewFlock"
+                    icon="add-circle-outline">Start a Flock</paper-icon-button>
             </app-toolbar>
         </app-header>
 
-        <div content>
-            <div class="vertical layout">
-                <template is="dom-repeat" items="[[flocks.results]]">
-                    <paper-card class="flock-card" image="">
-                        <div class="card-content">
-                            <div class="flock-heading">
-                                <span class="flock-name">[[item.name]]</span>
-                                <span class="flock-action"><paper-fab mini toggles class="flock-favorite" icon="favorite-border"></paper-fab></span>
-                            </div>
-                            <div class="flock-description">[[item.description]]</div>
+        <div class="vertical layout">
+            <template is="dom-repeat" items="[[flocks.results]]">
+                <!-- TODO: refactor into flock-card -->
+                <paper-card class="flock-card" image="">
+                    <div class="card-content">
+                        <div class="flock-heading">
+                            <span class="flock-name">[[item.name]]</span>
+                            <span class="flock-action">
+                                <template is="dom-if" if="[[isOwner(item)]]">
+                                    <paper-fab mini
+                                               on-tap="onEditFlock"
+                                               class="flock-fab-button"
+                                               icon="create">Modify this flock</paper-fab>
+                                    <paper-fab mini
+                                               on-tap="onDeleteFlock"
+                                               class="flock-fab-button"
+                                               icon="delete">Delete this flock</paper-fab>
+                                    <paper-fab mini toggles active disabled
+                                               class="flock-fab-button"
+                                               icon="favorite-border">You lead this flock</paper-fab>
+                                </template>
+                                <template is="dom-if" if="[[!isOwner(item)]]">
+                                    <paper-fab mini toggles
+                                               on-tap="onJoinFlock"
+                                               class="flock-fab-button"
+                                               icon="favorite-border">Join this flock</paper-fab>
+                                </template>
+                            </span>
                         </div>
-                        <div class="card-actions">
-                            <div class="flock-details">
-                                <span class="flock-details-group">
-                                    <iron-icon icon="device:access-time"></iron-icon>
-                                    <span>[[item.when]]</span>
-                                </span>
-                                <span class="flock-details-group">
-                                    <iron-icon icon="maps:place"></iron-icon>
-                                    <span>[[item.where]]</span>
-                                </span>
-                                <span class="flock-details-group">
-                                    <iron-icon icon="social:person"></iron-icon>
-                                    <span><a href="https://github.com/[[item.leader]]" target="_blank" rel="noopener noreferrer">[[item.leader]]</a> flew first</span>
-                                </span>
-                            </div>
-                            <div class="flock-details">
-                                <iron-icon icon="social:group"></iron-icon>
+                        <div class="flock-description">[[item.description]]</div>
+                    </div>
+                    <div class="card-actions">
+                        <div class="flock-details">
+                            <span class="flock-details-group">
+                                <iron-icon icon="device:access-time"></iron-icon>
+                                <span>[[item.when]]</span>
+                            </span>
+                            <span class="flock-details-group">
+                                <iron-icon icon="maps:place"></iron-icon>
+                                <span>[[item.where]]</span>
+                            </span>
+                            <span class="flock-details-group">
+                                <iron-icon icon="social:person"></iron-icon>
+                                <span><a href="https://github.com/[[item.leader]]" target="_blank" rel="noopener noreferrer">[[item.leader]]</a> started it</span>
+                            </span>
+                        </div>
+                        <div class="flock-details">
+                            <iron-icon icon="social:group"></iron-icon>
+                            <template is="dom-if" if="[[item.birds.length]]">
                                 <template is="dom-repeat" items="[[item.birds]]">
                                     <span><a href="https://github.com/[[item]]" target="_blank" rel="noopener noreferrer">[[item]]</a></span>
                                 </template>
-                                <span>will flock</span>
-                            </div>
+                                <span>will join</span>
+                            </template>
+                            <template is="dom-if" if="[[!item.birds.length]]">
+                                <span>No one in the flock yet</span>
+                            </template>
                         </div>
-                    </paper-card>
-                </template>
-            </div>
+                    </div>
+                </paper-card>
+            </template>
         </div>
     </app-header-layout>
 
     <form is="iron-form"
-          id="form"
+          id="flockForm"
+          on-iron-form-response="onNewFlockResponse"
+          on-iron-form-error="onNewFlockError"
           method="post"
           action="/api/flocks"
           content-type="application/json">
-        <paper-dialog id="dialog" modal>
-            <h2>New Flock</h2>
+        <paper-dialog id="flockDialog" modal>
+            <h2>Start a Flock</h2>
             <paper-dialog-scrollable>
                 <paper-input name="name"
                              label="Name your flock"
@@ -192,7 +226,7 @@
             </paper-dialog-scrollable>
             <div class="buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button id="accept">Accept</paper-button>
+                <paper-button on-tap="onSubmitNewFlockRequest">Submit</paper-button>
             </div>
         </paper-dialog>
     </form>
@@ -201,34 +235,45 @@
 <script>
   Polymer({
     is: 'bof-app',
-    listeners: {
-        'newFlock.tap': 'showForm',
-        'accept.tap': 'onCreateRequest',
-        'form.iron-form-response': 'onCreateResponse',
-        'form.iron-form-error': 'onCreateError'
+
+    isOwner: function(flock) {
+        // TODO: replace with authed user
+        return flock.leader === 'nobody';
     },
 
-    csvList: function(arr) {
-        return arr.join(', ');
+    onNewFlock: function() {
+        this.$.flockDialog.set('opened', true);
     },
 
-    showForm: function() {
-        this.$.dialog.set('opened', true);
-    },
-
-    onCreateRequest: function(evt) {
+    onSubmitNewFlockRequest: function(evt) {
         evt.preventDefault();
-        this.$.form.submit();
+        this.$.flockForm.submit();
     },
 
-    onCreateResponse: function(evt) {
-        console.log(evt.detail.response);
-        this.$.form.reset();
-        this.$.dialog.set('opened', false);
+    onNewFlockResponse: function(evt) {
+        this.$.flockForm.reset();
+        this.$.flockDialog.set('opened', false);
+        this.$.flockList.generateRequest();
     },
 
-    onCreateError: function(evt) {
-        console.error(evt.detail);
+    onNewFlockError: function(evt) {
+        // TODO: show user errors in dialog
+        console.error(evt);
+    },
+
+    onDeleteFlock: function(evt) {
+        // TODO: implement ajax
+        console.log(evt);
+    },
+
+    onJoinFlock: function(evt) {
+        // TODO: implement ajax
+        console.log(evt)
+    },
+
+    onEditFlock: function(evt) {
+        // TODO: implement ajax
+        console.log(evt)
     }
   });
   </script>
