@@ -48,7 +48,8 @@
 
             <div class="vertical layout">
                 <template is="dom-repeat" items="[[flocks.results]]">
-                    <bof-card name="[[item.name]]"
+                    <bof-card id="[[item.id]]"
+                              name="[[item.name]]"
                               description="[[item.description]]"
                               when="[[item.when]]"
                               where="[[item.where]]"
@@ -80,7 +81,7 @@
                                  maxlength="128"
                                  char-counter required></paper-input>
                     <paper-input name="where"
-                                 label="Where do you want to meet?" 
+                                 label="Where do you want to meet?"
                                  maxlength="128"
                                  char-counter required></paper-input>
                 </paper-dialog-scrollable>
@@ -97,7 +98,7 @@
             is: 'bof-app',
 
             onNewFlock: function() {
-                this.$.flockDialog.set('opened', true);
+                this.$.flockDialog.opened = true;
             },
 
             onSubmitNewFlockRequest: function(evt) {
@@ -107,7 +108,7 @@
 
             onNewFlockResponse: function(evt) {
                 this.$.flockForm.reset();
-                this.$.flockDialog.set('opened', false);
+                this.$.flockDialog.opened = false;
                 this.$.flockList.generateRequest();
             },
 

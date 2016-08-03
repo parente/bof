@@ -46,6 +46,7 @@ class Flock(db.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'name': self.name,
             'description': self.description,
             'where': self.where,
@@ -83,28 +84,59 @@ def create_flock():
     return (jsonify(flock.to_dict()), 201)
 
 @app.route('/api/flocks/<fid>', methods=['PUT'])
-def join_flock(fid):
-    # TODO: also need to support owner modification
+def update_flock(fid):
     # TODO: replace with authed user
-    user = User.query.filter_by(username='nobody').first()
+    username = 'nobody'
 
-    flock = Flock.query.get(fid)
-    flock.birds.append(user)
-    db.session.commit()
+    user = User.query.filter_by(username=username).first()
 
-    return (jsonify(flock.to_dict()), 200)
+    # TODO: do update
+
+    return '{}', 200
 
 @app.route('/api/flocks/<fid>', methods=['DELETE'])
 def delete_flock(fid):
     # TODO: replace with authed user
-    user = User.query.filter_by(username='nobody').first()
+    username = 'nobody'
+    user = User.query.filter_by(username=username).first()
 
+    # check if user has access to delete
     flock = Flock.query.get(fid)
-    # TODO: check if user has access to delete
+    if flock.leader.username != username:
+        return (jsonify({
+            'status': 401,
+            'message': '{} cannot delete flock'.format(username)
+        }), 401)
 
     db.session.delete(flock)
     db.session.commit()
-    return None, 204
+    return '', 204
+
+@app.route('/api/flocks/<fid>/birds', methods=['POST'])
+def join_flock(fid):
+    # TODO: replace with authed user
+    username = 'nobody'
+    user = User.query.filter_by(username=username).first()
+
+    flock = Flock.query.get(fid)
+    if username not in flock.birds:
+        flock.birds.append(user)
+    db.session.commit()
+
+    return (jsonify(flock.to_dict()), 200)
+
+@app.route('/api/flocks/<fid>/birds/self', methods=['DELETE'])
+def leave_flock(fid):
+    # TODO: replace with authed user
+    username = 'nobody'
+    user = User.query.filter_by(username=username).first()
+
+    flock = Flock.query.get(fid)
+    if user in flock.birds:
+        flock.birds.remove(user)
+    db.session.commit()
+
+    return (jsonify(flock.to_dict()), 200)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

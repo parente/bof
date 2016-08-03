@@ -1,4 +1,5 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-card/paper-card.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-toast/paper-toast.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-fab/paper-fab.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
@@ -50,6 +51,7 @@
 
             .action {
                 float: right;
+                margin-top: -10px;
             }
 
             .description {
@@ -85,34 +87,45 @@
         <iron-ajax id="deleteFlock"
                    url="/api/flocks/[[id]]"
                    method="DELETE"
-                   handle-as="json"></iron-ajax>
+                   handle-as="json"
+                   on-response="onDeleteFlockResponse"
+                   on-error="onDeleteFlockError"></iron-ajax>
         <iron-ajax id="joinFlock"
-                   url="/api/flocks/[[id]]"
-                   method="PUT"
-                   handle-as="json"></iron-ajax>
+                   url="/api/flocks/[[id]]/birds"
+                   method="POST"
+                   handle-as="json"
+                   on-response="onJoinLeaveFlockResponse"
+                   on-error="onJoinFlockError"></iron-ajax>
+         <iron-ajax id="leaveFlock"
+                    url="/api/flocks/[[id]]/birds/self"
+                    method="DELETE"
+                    handle-as="json"
+                    on-response="onJoinLeaveFlockResponse"
+                    on-error="onLeaveFlockError"></iron-ajax>
 
         <paper-card class="bof-card">
             <div class="card-content">
                 <div class="heading">
-                    <span class="name">[[name]]</span>
                     <span class="action">
-                <template is="dom-if" if="[[isOwner(leader)]]">
-                    <paper-fab mini
-                               on-tap="onEditFlock"
-                               icon="create">Modify this flock</paper-fab>
-                    <paper-fab mini
-                               on-tap="onDeleteFlock"
-                               icon="delete">Delete this flock</paper-fab>
-                    <paper-fab mini toggles active disabled
-                               icon="favorite-border">You lead this flock</paper-fab>
-                </template>
-                <template is="dom-if" if="[[!isOwner(leader)]]">
-                    <paper-fab mini toggles
-                               on-tap="onJoinFlock"
-                               class="fab-button"
-                               icon="favorite-border">Join this flock</paper-fab>
-                </template>
-            </span>
+                        <template is="dom-if" if="[[isOwner(leader)]]">
+                            <paper-fab mini
+                                       on-tap="onEditFlock"
+                                       icon="create">Modify this flock</paper-fab>
+                            <paper-fab mini
+                                       on-tap="onDeleteFlock"
+                                       icon="delete">Delete this flock</paper-fab>
+                            <paper-fab mini toggles active disabled
+                                       icon="favorite-border">You lead this flock</paper-fab>
+                        </template>
+                        <template is="dom-if" if="[[!isOwner(leader)]]">
+                            <paper-fab mini toggles id="joinLeaveButton"
+                                       active="[[isBird(birds)]]"
+                                       on-tap="onJoinLeaveFlock"
+                                       class="fab-button"
+                                       icon="favorite-border">Join or leave this flock</paper-fab>
+                        </template>
+                    </span>
+                    <span class="name">[[name]]</span>
                 </div>
                 <div class="description">[[description]]</div>
             </div>
@@ -129,7 +142,7 @@
                     <span class="details-group">
                 <iron-icon icon="social:person"></iron-icon>
                 <span>
-                  <a href="https://github.com/[[leader]]" target="_blank" rel="noopener noreferrer">[[leader]]</a> started it</span>
+                  <a href="https://github.com/[[leader]]" target="_blank" rel="noopener noreferrer">[[leader]]</a> started the flock</span>
                 </span>
                 </div>
                 <div class="details">
@@ -138,7 +151,6 @@
                         <template is="dom-repeat" items="[[birds]]">
                             <span><a href="https://github.com/[[item]]" target="_blank" rel="noopener noreferrer">[[item]]</a></span>
                         </template>
-                        <span>will join</span>
                     </template>
                     <template is="dom-if" if="[[!birds.length]]">
                         <span>No one in the flock yet</span>
@@ -146,6 +158,17 @@
                 </div>
             </div>
         </paper-card>
+
+        <paper-toast id="errorToast"></paper-toast>
+
+        <paper-dialog id="flockDialog" on-iron-overlay-closed="onDeleteConfirmed">
+            <h2>Delete a Flock</h2>
+            <p>Are you sure you want to delete "<em>[[name]]</em>"?</p>
+            <div class="buttons">
+                <paper-button dialog-dismiss autofocus>No</paper-button>
+                <paper-button dialog-confirm>Yes</paper-button>
+            </div>
+        </paper-dialog>
     </template>
 
     <script>
@@ -167,14 +190,56 @@
                 return leader === 'nobody';
             },
 
-            onDeleteFlock: function(evt) {
-                // TODO: implement ajax
-                console.log(evt);
+            isBird: function(birds) {
+                // TODO: replace with authed user info
+                return birds.indexOf('nobody') !== -1;
             },
 
-            onJoinFlock: function(evt) {
-                // TODO: implement ajax
-                console.log(evt)
+            onDeleteFlock: function(evt) {
+                this.$.flockDialog.opened = true;
+            },
+
+            onDeleteConfirmed: function(evt) {
+                if(evt.detail.confirmed) {
+                    this.$.deleteFlock.generateRequest();
+                }
+            },
+
+            onDeleteFlockResponse: function(evt) {
+                this.remove();
+            },
+
+            onDeleteFlockError: function(err) {
+                this.$.errorToast.text = 'Oops! Trouble deleting the flock';
+                this.$.errorToast.opened = true;
+            },
+
+            onJoinLeaveFlock: function(evt) {
+                if(Polymer.dom(evt).localTarget.active) {
+                    this.$.joinFlock.generateRequest();
+                } else {
+                    this.$.leaveFlock.generateRequest();
+                }
+            },
+
+            onJoinLeaveFlockResponse: function(evt) {
+                var flock = Polymer.dom(evt).localTarget.lastResponse;
+                this.birds = flock.birds;
+            },
+
+            onJoinFlockError: function(err) {
+                console.error(err);
+                this.$.errorToast.text = 'Oops! Trouble joining the flock';
+                this.$.errorToast.opened = true;
+                // dom-if wrapped node, need to search for it
+                this.$$('#joinLeaveButton').active = false;
+            },
+
+            onLeaveFlockError: function(err) {
+                console.error(err);
+                this.$.errorToast.text = 'Oops! Trouble leaving the flock';
+                this.$.errorToast.opened = true;
+                this.$$('#joinLeaveButton').active = true;
             },
 
             onEditFlock: function(evt) {
