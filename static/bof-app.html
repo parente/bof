@@ -1,14 +1,15 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/polymer/polymer.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-header/app-header.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/paper-styles.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/classes/global.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-toast/paper-toast.html">
 
 <link rel="import" href="./bof-card.html">
 <link rel="import" href="./bof-editor.html">
@@ -75,7 +76,8 @@
                                   where="[[item.where]]"
                                   leader="[[item.leader]]"
                                   birds="[[item.birds]]"
-                                  on-edit-flock="onEditFlock"></bof-card>
+                                  on-edit-flock="onEditFlock"
+                                  on-error="onError"></bof-card>
                     </template>
                 </template>
                 <template is="dom-if" if="[[!flocks.results.length]]">
@@ -84,7 +86,9 @@
             </div>
         </app-header-layout>
 
-        <bof-editor id="flockEditor" on-commit="onCommit"></bof-editor>
+        <bof-editor id="flockEditor" on-commit="onCommit" on-error="onError"></bof-editor>
+
+        <paper-toast id="burntToast"></paper-toast>
     </template>
 
     <script>
@@ -113,6 +117,11 @@
 
             onCommit: function(evt) {
                 this.$.flockList.generateRequest();
+            },
+
+            onError: function(evt) {
+                this.$.burntToast.text = evt.detail.text;
+                this.$.burntToast.opened = true;
             }
         });
     </script>

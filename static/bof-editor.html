@@ -1,9 +1,8 @@
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-form/iron-form.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-button/paper-button.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog/paper-dialog.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-input/paper-input.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-form/iron-form.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-toast/paper-toast.html">
 
 <dom-module id="bof-editor">
     <template>
@@ -49,8 +48,6 @@
                 </div>
             </paper-dialog>
         </form>
-
-        <paper-toast id="errorToast"></paper-toast>
     </template>
 
     <script>
@@ -100,11 +97,11 @@
                 this.fire('commit');
             },
 
-            onError: function(evt) {
+            onError: function(err) {
               console.error(err);
-              this.$.errorToast.text = 'Oops! Trouble saving the flock';
-              this.$.errorToast.opened = true;
-              this.fire('fail');
+              this.fire('error', {
+                  text: 'Oops! Trouble saving the flock'
+              });
             }
         });
     </script>
