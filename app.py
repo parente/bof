@@ -1,9 +1,14 @@
 import os
-from flask import Flask, render_template, jsonify, request, url_for
+from flask import (Flask, render_template, jsonify, request, url_for, session,
+    redirect)
 from flask_sqlalchemy import SQLAlchemy
+from flask_oauthlib.client import OAuth
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:////tmp/bof.db')
+app.secret_key = os.getenv('SECRET_KEY', os.urandom(24))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI',
+    'sqlite:////tmp/bof.db')
+
 db = SQLAlchemy(app)
 
 birds_table = db.Table('birds',
@@ -61,21 +66,84 @@ class Flock(db.Model):
             'birds': [bird.username for bird in self.birds]
         }
 
+oauth = OAuth(app)
+github = oauth.remote_app(
+    'github',
+    consumer_key=os.getenv('GITHUB_CLIENT_ID'),
+    consumer_secret=os.getenv('GITHUB_CLIENT_SECRET'),
+    request_token_params=None,
+    base_url='https://api.github.com/',
+    request_token_url=None,
+    access_token_method='POST',
+    access_token_url='https://github.com/login/oauth/access_token',
+    authorize_url='https://github.com/login/oauth/authorize'
+)
+
+@app.route('/api/auth/github', methods=["POST", "GET"])
+def login():
+    return github.authorize(callback=url_for('authorized', _external=True))
+
+@app.route('/api/auth/github', methods=["DELETE"])
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+@app.route('/api/auth/github/authorization')
+def authorized():
+    resp = github.authorized_response()
+
+    if resp is None:
+        return unauthorized('{}: {} cannot delete flock'.format(
+                request.args['error'], request.args['error_description']
+            )
+        )
+
+    # format required to fetch user profile
+    session['oauth_token'] = (resp['access_token'], '')
+    me = github.get('user')
+    username = session['username'] = me.data['login']
+    session['oauth_provider'] = 'github'
+
+    # create a user model if one does not exist
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        user = User(username)
+        db.session.add(user)
+        db.session.commit()
+
+    return redirect(url_for('index'))
+
+@github.tokengetter
+def get_github_oauth_token():
+    return session.get('oauth_token')
+
+def unauthorized(message):
+    return (jsonify({
+        'status': 401,
+        'message': message
+    }), 401)
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    username = session.get('username', '')
+    return render_template('index.html', username=username)
 
 @app.route('/api/flocks')
 def list_flocks():
     flocks = Flock.query.all()
-    return jsonify({'results' : [flock.to_dict() for flock in reversed(flocks)]})
+    return jsonify({
+        'results' : [flock.to_dict() for flock in reversed(flocks)]
+    })
 
 @app.route('/api/flocks', methods=['POST'])
 def create_flock():
     content = request.json
 
-    # TODO: replace with authed user
-    username = 'nobody'
+    # authenticated user is the leader of the flock
+    try:
+        username = session['username']
+    except KeyError:
+        return unauthorized('must be logged in to create a flock')
     user = User.query.filter_by(username=username).first()
 
     flock = Flock(name=content['name'],
@@ -94,17 +162,17 @@ def create_flock():
 def update_flock(fid):
     content = request.json
 
-    # TODO: replace with authed user
-    username = 'nobody'
+    # authenticated user is the leader of the flock
+    try:
+        username = session['username']
+    except KeyError:
+        return unauthorized('must be logged in to update a flock')
     user = User.query.filter_by(username=username).first()
 
     # check if user has access to update
     flock = Flock.query.get(fid)
     if flock.leader.username != username and not user.admin:
-        return (jsonify({
-            'status': 401,
-            'message': '{} cannot delete flock'.format(username)
-        }), 401)
+        return unauthorized('{} cannot delete flock'.format(username))
 
     flock.name = content.get('name', flock.name)
     flock.description = content.get('description', flock.name)
@@ -116,17 +184,17 @@ def update_flock(fid):
 
 @app.route('/api/flocks/<fid>', methods=['DELETE'])
 def delete_flock(fid):
-    # TODO: replace with authed user
-    username = 'nobody'
+    # authenticated user is the leader of the flock
+    try:
+        username = session['username']
+    except KeyError:
+        return unauthorized('must be logged in to delete a flock')
     user = User.query.filter_by(username=username).first()
 
     # check if user has access to delete
     flock = Flock.query.get(fid)
     if flock.leader.username != username and not user.admin:
-        return (jsonify({
-            'status': 401,
-            'message': '{} cannot delete flock'.format(username)
-        }), 401)
+        return unauthorized('{} cannot delete flock'.format(username))
 
     db.session.delete(flock)
     db.session.commit()
@@ -134,8 +202,11 @@ def delete_flock(fid):
 
 @app.route('/api/flocks/<fid>/birds', methods=['POST'])
 def join_flock(fid):
-    # TODO: replace with authed user
-    username = 'nobody'
+    # authenticated user is the leader of the flock
+    try:
+        username = session['username']
+    except KeyError:
+        return unauthorized('must be logged in to join a flock')
     user = User.query.filter_by(username=username).first()
 
     flock = Flock.query.get(fid)
@@ -147,8 +218,11 @@ def join_flock(fid):
 
 @app.route('/api/flocks/<fid>/birds/self', methods=['DELETE'])
 def leave_flock(fid):
-    # TODO: replace with authed user
-    username = 'nobody'
+    # authenticated user is the leader of the flock
+    try:
+        username = session['username']
+    except KeyError:
+        return unauthorized('must be logged in to leave a flock')
     user = User.query.filter_by(username=username).first()
 
     flock = Flock.query.get(fid)

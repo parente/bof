@@ -8,19 +8,17 @@ db.create_all()
 admin = User('admin', admin=True)
 nobody = User('nobody')
 foobar = User('foobar')
-parente = User('parente')
 
 db.session.add(admin)
 db.session.add(foobar)
 db.session.add(nobody)
-db.session.add(parente)
 db.session.commit()
 
 f1 = Flock(name='Jupyter and Drinks',
     description="Let's chat about all things Jupyter",
     where='By the front door',
     when='7 pm',
-    leader=parente)
+    leader=admin)
 
 f2 = Flock(name='the life of scipy',
     description="Where are we going next?",

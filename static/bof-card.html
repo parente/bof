@@ -155,17 +155,16 @@
                 when: String,
                 where: String,
                 birds: Array,
-                fid: String
+                fid: String,
+                username: String
             },
 
             isOwner: function(leader) {
-                // TODO: replace with authed user info
-                return leader === 'nobody';
+                return leader === this.username;
             },
 
             isBird: function(birds) {
-                // TODO: replace with authed user info
-                return birds.indexOf('nobody') !== -1;
+                return birds.indexOf(this.username) !== -1;
             },
 
             onDeleteFlock: function(evt) {

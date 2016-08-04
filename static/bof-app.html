@@ -77,6 +77,7 @@
                                   where="[[item.where]]"
                                   leader="[[item.leader]]"
                                   birds="[[item.birds]]"
+                                  username="[[username]]"
                                   on-edit-flock="onEditFlock"
                                   on-delete-flock="onDeleteFlock"
                                   on-error="onError"></bof-card>
@@ -97,15 +98,23 @@
     <script>
         Polymer({
             is: 'bof-app',
+            properties: {
+                username: String
+            },
 
             onNewFlock: function() {
-                // TODO: is there a better way to do this en masse?
-                this.$.flockEditor.fid = '';
-                this.$.flockEditor.name = '';
-                this.$.flockEditor.description = '';
-                this.$.flockEditor.when = '';
-                this.$.flockEditor.where = '';
-                this.$.flockEditor.opened = true;
+                if(!this.username) {
+                    // TODO: show dialog first
+                    window.location = '/api/auth/github';
+                } else {
+                    // TODO: is there a better way to do this en masse?
+                    this.$.flockEditor.fid = '';
+                    this.$.flockEditor.name = '';
+                    this.$.flockEditor.description = '';
+                    this.$.flockEditor.when = '';
+                    this.$.flockEditor.where = '';
+                    this.$.flockEditor.opened = true;
+                }
             },
 
             onEditFlock: function(evt) {
