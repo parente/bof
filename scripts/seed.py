@@ -5,10 +5,13 @@ from app import *
 db.drop_all()
 db.create_all()
 
+admin = User('admin', admin=True)
 nobody = User('nobody')
 foobar = User('foobar')
 parente = User('parente')
 
+db.session.add(admin)
+db.session.add(foobar)
 db.session.add(nobody)
 db.session.add(parente)
 db.session.commit()

@@ -15,13 +15,19 @@ class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(128), unique=True)
+    banned = db.Column(db.Boolean, default=False)
+    admin = db.Column(db.Boolean, default=False)
 
-    def __init__(self, username):
+    def __init__(self, username, banned=False, admin=False):
         self.username = username
+        self.banned = banned
+        self.admin = admin
 
     def to_dict(self):
         return {
-            'username': self.username
+            'username': self.username,
+            'banned': self.banned,
+            'admin': self.admin
         }
 
 class Flock(db.Model):
@@ -69,8 +75,8 @@ def create_flock():
     content = request.json
 
     # TODO: replace with authed user
-    user = User.query.filter_by(username='nobody').first()
-    print(user)
+    username = 'nobody'
+    user = User.query.filter_by(username=username).first()
 
     flock = Flock(name=content['name'],
         description=content['description'],
@@ -94,7 +100,7 @@ def update_flock(fid):
 
     # check if user has access to update
     flock = Flock.query.get(fid)
-    if flock.leader.username != username:
+    if flock.leader.username != username and not user.admin:
         return (jsonify({
             'status': 401,
             'message': '{} cannot delete flock'.format(username)
@@ -116,7 +122,7 @@ def delete_flock(fid):
 
     # check if user has access to delete
     flock = Flock.query.get(fid)
-    if flock.leader.username != username:
+    if flock.leader.username != username and not user.admin:
         return (jsonify({
             'status': 401,
             'message': '{} cannot delete flock'.format(username)

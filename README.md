@@ -15,6 +15,8 @@ Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a v
 * [X] As an authenticated user, I want to edit my flock details
 * [ ] As an admin, I want to seed suggested flock locations
 * [ ] As an admin, I want to deploy the app
+* [ ] As an admin, I want control over content
+* [ ] As an admin, I want control over users accounts
 
 ### Bonus
 
@@ -24,7 +26,9 @@ Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a v
 
 ### Nits
 
+* Format the bird list on the cards
 * Highlight name field when there's a duplicate flock name error
+* Enter key should submit form, escape should dismiss
 
 ### Questions
 

@@ -16,7 +16,8 @@
               id="form"
               on-iron-form-response="onResponse"
               on-iron-form-error="onError"
-              method="POST" action="[[getResource(fid)]]"
+              method="POST"
+              action="[[getResource(fid)]]"
               content-type="application/json">
             <paper-dialog id="dialog" modal on-iron-overlay-closed="onClosed">
                 <h2>[[getTitle(fid)]]</h2>
