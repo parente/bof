@@ -12,12 +12,16 @@ Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a v
 * [X] As an authenticated user, I want to propose a flock
 * [X] As an authenticated user, I want to join a flock
 * [X] As an authenticated user, I want to leave a flock
-* [ ] As an authenticated user, I want to edit my flock details
+* [X] As an authenticated user, I want to edit my flock details
 * [ ] As an admin, I want to seed suggested flock locations
 * [ ] As an admin, I want to deploy the app
 
 ### Bonus
 
-* As a user, I want to see flock updates
+* As a user, I want to see flock updates without refreshing
 * As an authenticated user, I want to join my flock with another
 * As an authenticated user, I want to spruce up my flock card with an image
+
+### Nits
+
+* Highlight name field when there's a duplicate flock name error
