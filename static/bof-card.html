@@ -74,12 +74,6 @@
             }
         </style>
 
-        <iron-ajax id="deleteFlock"
-                   url="/api/flocks/[[fid]]"
-                   method="DELETE"
-                   handle-as="json"
-                   on-response="onDeleteFlockResponse"
-                   on-error="onDeleteFlockError"></iron-ajax>
         <iron-ajax id="joinFlock"
                    url="/api/flocks/[[fid]]/birds"
                    method="POST"
@@ -148,15 +142,6 @@
                 </div>
             </div>
         </paper-card>
-
-        <paper-dialog id="deleteFlockDialog" on-iron-overlay-closed="onDeleteConfirmed">
-            <h2>Delete a Flock</h2>
-            <p>Are you sure you want to delete "<em>[[name]]</em>"?</p>
-            <div class="buttons">
-                <paper-button dialog-dismiss autofocus>No</paper-button>
-                <paper-button dialog-confirm>Yes</paper-button>
-            </div>
-        </paper-dialog>
     </template>
 
     <script>
@@ -184,22 +169,19 @@
             },
 
             onDeleteFlock: function(evt) {
-                this.$.deleteFlockDialog.opened = true;
+                this.fire('delete-flock', {
+                    fid: this.fid,
+                    name: this.name
+                });
             },
 
-            onDeleteConfirmed: function(evt) {
-                if(evt.detail.confirmed) {
-                    this.$.deleteFlock.generateRequest();
-                }
-            },
-
-            onDeleteFlockResponse: function(evt) {
-                this.remove();
-            },
-
-            onDeleteFlockError: function(err) {
-                this.fire('error', {
-                    text: 'Oops! Trouble deleting the flock'
+            onEditFlock: function(evt) {
+                this.fire('edit-flock', {
+                    fid: this.fid,
+                    name: this.name,
+                    description: this.description,
+                    when: this.when,
+                    where: this.where
                 });
             },
 
@@ -230,16 +212,6 @@
                 this.$$('#joinLeaveButton').active = true;
                 this.fire('error', {
                     text: 'Oops! Trouble leaving the flock'
-                });
-            },
-
-            onEditFlock: function(evt) {
-                this.fire('edit-flock', {
-                    fid: this.fid,
-                    name: this.name,
-                    description: this.description,
-                    when: this.when,
-                    where: this.where
                 });
             }
         });

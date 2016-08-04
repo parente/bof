@@ -13,6 +13,7 @@
 
 <link rel="import" href="./bof-card.html">
 <link rel="import" href="./bof-editor.html">
+<link rel="import" href="./bof-deleter.html">
 
 <dom-module id="bof-app">
     <template>
@@ -77,6 +78,7 @@
                                   leader="[[item.leader]]"
                                   birds="[[item.birds]]"
                                   on-edit-flock="onEditFlock"
+                                  on-delete-flock="onDeleteFlock"
                                   on-error="onError"></bof-card>
                     </template>
                 </template>
@@ -87,6 +89,7 @@
         </app-header-layout>
 
         <bof-editor id="flockEditor" on-commit="onCommit" on-error="onError"></bof-editor>
+        <bof-deleter id="flockDeleter" on-commit="onCommit" on-error="onError"></bof-deleter>
 
         <paper-toast id="burntToast"></paper-toast>
     </template>
@@ -113,6 +116,13 @@
                 this.$.flockEditor.when = flock.when;
                 this.$.flockEditor.where = flock.where;
                 this.$.flockEditor.opened = true;
+            },
+
+            onDeleteFlock: function(evt) {
+                var flock = evt.detail;
+                this.$.flockDeleter.fid = flock.fid;
+                this.$.flockDeleter.name = flock.name;
+                this.$.flockDeleter.opened = true;
             },
 
             onCommit: function(evt) {

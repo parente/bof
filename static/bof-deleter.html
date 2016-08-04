@@ -1,0 +1,60 @@
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-form/iron-form.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-button/paper-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog/paper-dialog.html">
+
+<dom-module id="bof-deleter">
+    <template>
+        <iron-ajax id="deleteFlock"
+                   url="/api/flocks/[[fid]]"
+                   method="DELETE"
+                   handle-as="json"
+                   on-response="onResponse"
+                   on-error="onError"></iron-ajax>
+
+         <paper-dialog id="dialog" modal on-iron-overlay-closed="onClosed">
+             <h2>Delete a Flock</h2>
+             <p>Are you sure you want to delete "<em>[[name]]</em>"?</p>
+             <div class="buttons">
+                 <paper-button dialog-dismiss autofocus>No</paper-button>
+                 <paper-button dialog-confirm>Yes</paper-button>
+             </div>
+         </paper-dialog>
+    </template>
+    <script>
+        Polymer({
+            is: 'bof-deleter',
+
+            properties: {
+                opened: {
+                    type: Boolean,
+                    notify: true,
+                    observer: 'onOpened'
+                },
+                fid: String,
+                name: String
+            },
+
+            onOpened: function(value) {
+                this.$.dialog.opened = value;
+            },
+
+            onClosed: function(evt) {
+                this.opened = false;
+                if(evt.detail.confirmed) {
+                    this.$.deleteFlock.generateRequest();
+                }
+            },
+
+            onResponse: function(evt) {
+                this.fire('commit');
+            },
+
+            onError: function(err) {
+                console.error(err);
+                this.fire('error', {
+                    text: 'Oops! Trouble deleting the flock'
+                });
+            }
+        });
+    </script>
+</dom-module>
