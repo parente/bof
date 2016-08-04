@@ -25,3 +25,7 @@ Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a v
 ### Nits
 
 * Highlight name field when there's a duplicate flock name error
+
+### Questions
+
+* What happens on transaction conflicts (e.g., update a flock while someone joins)?
