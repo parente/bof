@@ -76,19 +76,19 @@
         </style>
 
         <iron-ajax id="deleteFlock"
-                   url="/api/flocks/[[id]]"
+                   url="/api/flocks/[[fid]]"
                    method="DELETE"
                    handle-as="json"
                    on-response="onDeleteFlockResponse"
                    on-error="onDeleteFlockError"></iron-ajax>
         <iron-ajax id="joinFlock"
-                   url="/api/flocks/[[id]]/birds"
+                   url="/api/flocks/[[fid]]/birds"
                    method="POST"
                    handle-as="json"
                    on-response="onJoinLeaveFlockResponse"
                    on-error="onJoinFlockError"></iron-ajax>
          <iron-ajax id="leaveFlock"
-                    url="/api/flocks/[[id]]/birds/self"
+                    url="/api/flocks/[[fid]]/birds/self"
                     method="DELETE"
                     handle-as="json"
                     on-response="onJoinLeaveFlockResponse"
@@ -152,7 +152,7 @@
 
         <paper-toast id="errorToast"></paper-toast>
 
-        <paper-dialog id="flockDialog" on-iron-overlay-closed="onDeleteConfirmed">
+        <paper-dialog id="deleteFlockDialog" on-iron-overlay-closed="onDeleteConfirmed">
             <h2>Delete a Flock</h2>
             <p>Are you sure you want to delete "<em>[[name]]</em>"?</p>
             <div class="buttons">
@@ -173,7 +173,7 @@
                 when: String,
                 where: String,
                 birds: Array,
-                id: String
+                fid: String
             },
 
             isOwner: function(leader) {
@@ -187,7 +187,7 @@
             },
 
             onDeleteFlock: function(evt) {
-                this.$.flockDialog.opened = true;
+                this.$.deleteFlockDialog.opened = true;
             },
 
             onDeleteConfirmed: function(evt) {
@@ -234,8 +234,13 @@
             },
 
             onEditFlock: function(evt) {
-                // TODO: implement ajax
-                console.log(evt)
+                this.fire('edit-flock', {
+                    fid: this.fid,
+                    name: this.name,
+                    description: this.description,
+                    when: this.when,
+                    where: this.where
+                });
             }
         });
     </script>

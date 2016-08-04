@@ -28,9 +28,9 @@ class Flock(db.Model):
     __tablename__ = 'flock'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    description = db.Column(db.String(512))
-    where = db.Column(db.String(128))
-    when = db.Column(db.String(128))
+    description = db.Column(db.String(256))
+    where = db.Column(db.String(64))
+    when = db.Column(db.String(64))
     leader_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     leader = db.relationship('User')
     birds = db.relationship('User', secondary=birds_table,
@@ -83,16 +83,30 @@ def create_flock():
 
     return (jsonify(flock.to_dict()), 201)
 
-@app.route('/api/flocks/<fid>', methods=['PUT'])
+# need to support POST because polymer doesn't send JSON bodies with PUT
+@app.route('/api/flocks/<fid>', methods=['PUT', 'POST'])
 def update_flock(fid):
+    content = request.json
+
     # TODO: replace with authed user
     username = 'nobody'
-
     user = User.query.filter_by(username=username).first()
 
-    # TODO: do update
+    # check if user has access to update
+    flock = Flock.query.get(fid)
+    if flock.leader.username != username:
+        return (jsonify({
+            'status': 401,
+            'message': '{} cannot delete flock'.format(username)
+        }), 401)
 
-    return '{}', 200
+    flock.name = content.get('name', flock.name)
+    flock.description = content.get('description', flock.name)
+    flock.when = content.get('when', flock.when)
+    flock.where = content.get('where', flock.where)
+    db.session.commit()
+
+    return (jsonify(flock.to_dict()), 200)
 
 @app.route('/api/flocks/<fid>', methods=['DELETE'])
 def delete_flock(fid):

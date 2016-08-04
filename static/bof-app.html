@@ -1,21 +1,17 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/polymer/polymer.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-button/paper-button.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog/paper-dialog.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-input/paper-input.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-form/iron-form.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-header/app-header.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/paper-styles.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/classes/global.html">
 
 <link rel="import" href="./bof-card.html">
+<link rel="import" href="./bof-editor.html">
 
 <dom-module id="bof-app">
     <template>
@@ -34,7 +30,7 @@
                 overflow: hidden;
             }
 
-            paper-dialog {
+            bof-editor {
                 max-width: 80%;
                 width: 600px;
             }
@@ -72,13 +68,14 @@
             <div class="vertical layout">
                 <template is="dom-if" if="[[flocks.results.length]]">
                     <template is="dom-repeat" items="[[flocks.results]]">
-                        <bof-card id="[[item.id]]"
+                        <bof-card fid="[[item.id]]"
                                   name="[[item.name]]"
                                   description="[[item.description]]"
                                   when="[[item.when]]"
                                   where="[[item.where]]"
                                   leader="[[item.leader]]"
-                                  birds="[[item.birds]]"></bof-card>
+                                  birds="[[item.birds]]"
+                                  on-edit-flock="onEditFlock"></bof-card>
                     </template>
                 </template>
                 <template is="dom-if" if="[[!flocks.results.length]]">
@@ -87,38 +84,7 @@
             </div>
         </app-header-layout>
 
-        <form is="iron-form"
-              id="flockForm"
-              on-iron-form-response="onNewFlockResponse"
-              on-iron-form-error="onNewFlockError"
-              method="POST" action="/api/flocks"
-              content-type="application/json">
-            <paper-dialog id="flockDialog" modal>
-                <h2>Start a Flock</h2>
-                <paper-dialog-scrollable>
-                    <paper-input name="name"
-                                 label="Name your flock"
-                                 maxlength="128"
-                                 char-counter autofocus required></paper-input>
-                    <paper-input name="description"
-                                 label="Describe the topic"
-                                 maxlength="256"
-                                 char-counter required></paper-input>
-                    <paper-input name="when"
-                                 label="When do you want to meet?"
-                                 maxlength="128"
-                                 char-counter required></paper-input>
-                    <paper-input name="where"
-                                 label="Where do you want to meet?"
-                                 maxlength="128"
-                                 char-counter required></paper-input>
-                </paper-dialog-scrollable>
-                <div class="buttons">
-                    <paper-button dialog-dismiss>Cancel</paper-button>
-                    <paper-button on-tap="onSubmitNewFlockRequest">Submit</paper-button>
-                </div>
-            </paper-dialog>
-        </form>
+        <bof-editor id="flockEditor" on-commit="onCommit"></bof-editor>
     </template>
 
     <script>
@@ -126,23 +92,27 @@
             is: 'bof-app',
 
             onNewFlock: function() {
-                this.$.flockDialog.opened = true;
+                // TODO: is there a better way to do this en masse?
+                this.$.flockEditor.fid = '';
+                this.$.flockEditor.name = '';
+                this.$.flockEditor.description = '';
+                this.$.flockEditor.when = '';
+                this.$.flockEditor.where = '';
+                this.$.flockEditor.opened = true;
             },
 
-            onSubmitNewFlockRequest: function(evt) {
-                evt.preventDefault();
-                this.$.flockForm.submit();
+            onEditFlock: function(evt) {
+                var flock = evt.detail;
+                this.$.flockEditor.fid = flock.fid;
+                this.$.flockEditor.name = flock.name;
+                this.$.flockEditor.description = flock.description;
+                this.$.flockEditor.when = flock.when;
+                this.$.flockEditor.where = flock.where;
+                this.$.flockEditor.opened = true;
             },
 
-            onNewFlockResponse: function(evt) {
-                this.$.flockForm.reset();
-                this.$.flockDialog.opened = false;
+            onCommit: function(evt) {
                 this.$.flockList.generateRequest();
-            },
-
-            onNewFlockError: function(evt) {
-                // TODO: show user errors in dialog
-                console.error(evt);
             }
         });
     </script>
