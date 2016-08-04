@@ -6,14 +6,19 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-menu/paper-menu.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-item/paper-item.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/paper-styles.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/classes/global.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-toast/paper-toast.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-tooltip/paper-tooltip.html">
 
 <link rel="import" href="./bof-card.html">
 <link rel="import" href="./bof-editor.html">
 <link rel="import" href="./bof-deleter.html">
+<link rel="import" href="./bof-login.html">
 
 <dom-module id="bof-app">
     <template>
@@ -24,7 +29,7 @@
             }
 
             bof-card {
-                max-width: 100%;
+                max-width: 95%;
                 width: 600px;
                 margin: 10px auto;
                 padding: 10px;
@@ -37,8 +42,17 @@
                 width: 600px;
             }
 
+            paper-menu {
+                display: block;
+            }
+
+            paper-menu-button {
+                margin: auto;
+            }
+
             .logo {
-                height: 50px;
+                --iron-icon-height: 50px;
+                --iron-icon-width: 50px;
             }
 
             .engraved {
@@ -61,9 +75,25 @@
         <app-header-layout>
             <app-header effects="waterfall" fixed>
                 <app-toolbar>
-                    <img class="logo" src="http://pydata.it/img/logo.png" />
-                    <div title>Birds of a Feather</div>
-                    <paper-icon-button on-tap="onNewFlock" alt="Start a Flock" icon="add">Start a Flock</paper-icon-button>
+                    <iron-icon class="logo" alt="Logo" src="[[logoUrl]]"></iron-icon>
+                    <div title>[[title]]</div>
+                    <paper-icon-button id="refreshButton"
+                                       on-tap="onRefresh"
+                                       alt="Refresh flock list"
+                                       icon="refresh"></paper-icon-button>
+                    <paper-icon-button id="newButton"
+                                       on-tap="onNewFlock"
+                                       alt="Start a flock"
+                                       icon="add"></paper-icon-button>
+                    <paper-tooltip for="refreshButton" offset="0" position="left">Refresh flock list</paper-tooltip>
+                    <paper-tooltip for="newButton" offset="0" position="left">Start a flock</paper-tooltip>
+                    <template is="dom-if" if="[[username]]">
+                        <paper-icon-button id="logoutButton"
+                                           on-tap="onLogout"
+                                           alt="Logout"
+                                           icon="exit-to-app"></paper-icon-button>
+                        <paper-tooltip for="logoutButton" offset="0" position="left">Logout [[username]]</paper-tooltip>
+                    </template>
                 </app-toolbar>
             </app-header>
 
@@ -77,6 +107,7 @@
                                   where="[[item.where]]"
                                   leader="[[item.leader]]"
                                   birds="[[item.birds]]"
+                                  username="[[username]]"
                                   on-edit-flock="onEditFlock"
                                   on-delete-flock="onDeleteFlock"
                                   on-error="onError"></bof-card>
@@ -88,8 +119,9 @@
             </div>
         </app-header-layout>
 
-        <bof-editor id="flockEditor" on-commit="onCommit" on-error="onError"></bof-editor>
-        <bof-deleter id="flockDeleter" on-commit="onCommit" on-error="onError"></bof-deleter>
+        <bof-editor id="flockEditor" on-commit="onRefresh" on-error="onError"></bof-editor>
+        <bof-deleter id="flockDeleter" on-commit="onRefresh" on-error="onError"></bof-deleter>
+        <bof-login id="flockLogin"></bof-login>
 
         <paper-toast id="burntToast"></paper-toast>
     </template>
@@ -97,15 +129,31 @@
     <script>
         Polymer({
             is: 'bof-app',
+            properties: {
+                title: {
+                    type: String,
+                    value: 'Birds of a Feather'
+                },
+                logoUrl: {
+                    type: String,
+                    value: '/static/images/logo.png'
+                },
+                username: String,
+                avatarUrl: String
+            },
 
             onNewFlock: function() {
-                // TODO: is there a better way to do this en masse?
-                this.$.flockEditor.fid = '';
-                this.$.flockEditor.name = '';
-                this.$.flockEditor.description = '';
-                this.$.flockEditor.when = '';
-                this.$.flockEditor.where = '';
-                this.$.flockEditor.opened = true;
+                if(!this.username) {
+                    this.$.flockLogin.opened = true;
+                } else {
+                    // TODO: is there a better way to do this en masse?
+                    this.$.flockEditor.fid = '';
+                    this.$.flockEditor.name = '';
+                    this.$.flockEditor.description = '';
+                    this.$.flockEditor.when = '';
+                    this.$.flockEditor.where = '';
+                    this.$.flockEditor.opened = true;
+                }
             },
 
             onEditFlock: function(evt) {
@@ -125,13 +173,22 @@
                 this.$.flockDeleter.opened = true;
             },
 
-            onCommit: function(evt) {
+            onRefresh: function(evt) {
                 this.$.flockList.generateRequest();
             },
 
             onError: function(evt) {
-                this.$.burntToast.text = evt.detail.text;
-                this.$.burntToast.opened = true;
+                if(evt.detail.request && evt.detail.request.status === 401 && !this.username) {
+                    this.$.flockLogin.opened = true;
+                } else {
+                    this.$.burntToast.text = evt.detail.text;
+                    this.$.burntToast.opened = true;
+                }
+            },
+
+            onLogout: function(evt) {
+                document.body.setAttribute('unresolved', true);
+                window.location = '/logout';
             }
         });
     </script>

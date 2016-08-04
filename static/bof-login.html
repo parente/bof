@@ -1,0 +1,57 @@
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-button/paper-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-dialog/paper-dialog.html">
+
+<dom-module id="bof-login">
+    <style>
+        h2, p {
+            margin-bottom: 1em;
+        }
+
+        .loginButtons {
+            text-align: center;
+        }
+
+        paper-button {
+            display: block;
+        }
+    </style>
+    <template>
+         <paper-dialog id="dialog" with-backdrop on-iron-overlay-closed="onClosed">
+             <div>
+                 <h2>Login</h2>
+                 <p>You must login to create and join flocks.</p>
+             </div>
+             <div class="loginButtons">
+                 <paper-button raised dialog-confirm autofocus>
+                    <iron-icon src="images/github-circle.png"></iron-icon> Login with GitHub
+                 </paper-button>
+                 <paper-button raised dialog-dismiss>Cancel</paper-button>
+             </div>
+         </paper-dialog>
+    </template>
+    <script>
+        Polymer({
+            is: 'bof-login',
+
+            properties: {
+                opened: {
+                    type: Boolean,
+                    notify: true,
+                    observer: 'onOpened'
+                }
+            },
+
+            onOpened: function(value) {
+                this.$.dialog.opened = value;
+            },
+
+            onClosed: function(evt) {
+                this.opened = false;
+                if(evt.detail.confirmed) {
+                    document.body.setAttribute('unresolved', true);
+                    window.location = '/login';
+                }
+            }
+        });
+    </script>
+</dom-module>

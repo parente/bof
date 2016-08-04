@@ -5,16 +5,21 @@
         <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <title>{{title}}</title>
         <script src="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/webcomponentsjs/webcomponents-lite.min.js"></script>
         <link rel="import" href="static/bof-app.html">
         <style>
-        body {
-            margin: 0;
-            background-color: #ddd;
-        }
+            body {
+                margin: 0;
+                background-color: #ddd;
+            }
         </style>
     </head>
     <body unresolved>
-        <bof-app id="app"></bof-app>
+        <bof-app id="app"
+                 title="{{title}}"
+                 logo-url="{{logo_url}}"
+                 username="{{username}}"
+                 avatar-url="{{avatar_url}}"></bof-app>
     </body>
 </html>

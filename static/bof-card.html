@@ -5,6 +5,7 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/device-icons.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-card/paper-card.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-fab/paper-fab.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-tooltip/paper-tooltip.html">
 
 <dom-module id="bof-card">
     <template>
@@ -91,22 +92,33 @@
             <div class="card-content">
                 <div class="heading">
                     <span class="action">
-                        <template is="dom-if" if="[[isOwner(leader)]]">
-                            <paper-fab mini
+                        <template is="dom-if" if="[[isOwner(leader, username)]]">
+                            <paper-fab id="editButton"
+                                       mini
                                        on-tap="onEditFlock"
-                                       icon="create">Modify this flock</paper-fab>
-                            <paper-fab mini
+                                       icon="create"
+                                       alt="Edit this flock"></paper-fab>
+                            <paper-fab id="deleteButton"
+                                       mini
                                        on-tap="onDeleteFlock"
-                                       icon="delete">Delete this flock</paper-fab>
-                            <paper-fab mini toggles active disabled
-                                       icon="favorite-border">You lead this flock</paper-fab>
+                                       icon="delete"
+                                       alt="Delete this flock"></paper-fab>
+                            <paper-fab id="leadButton"
+                                       mini toggles active disabled
+                                       icon="favorite-border"
+                                       alt="You lead this flock"></paper-fab>
+                            <paper-tooltip for="editButton" offset="0">Edit this flock</paper-tooltip>
+                            <paper-tooltip for="deleteButton" offset="0">Delete this flock</paper-tooltip>
+                            <paper-tooltip for="leadButton" offset="0">You lead this flock</paper-tooltip>
                         </template>
-                        <template is="dom-if" if="[[!isOwner(leader)]]">
-                            <paper-fab mini toggles id="joinLeaveButton"
-                                       active="[[isBird(birds)]]"
+                        <template is="dom-if" if="[[!isOwner(leader, username)]]">
+                            <paper-fab id="joinLeaveButton"
+                                       mini toggles
+                                       active="[[isBird(birds, username)]]"
                                        on-tap="onJoinLeaveFlock"
                                        class="fab-button"
-                                       icon="favorite-border">Join or leave this flock</paper-fab>
+                                       icon="favorite-border"></paper-fab>
+                            <paper-tooltip for="joinLeaveButton" position="left" offset="0">Join / leave this flock</paper-tooltip>
                         </template>
                     </span>
                     <span class="name">[[name]]</span>
@@ -155,17 +167,16 @@
                 when: String,
                 where: String,
                 birds: Array,
-                fid: String
+                fid: String,
+                username: String
             },
 
-            isOwner: function(leader) {
-                // TODO: replace with authed user info
-                return leader === 'nobody';
+            isOwner: function(leader, username) {
+                return leader === username;
             },
 
-            isBird: function(birds) {
-                // TODO: replace with authed user info
-                return birds.indexOf('nobody') !== -1;
+            isBird: function(birds, username) {
+                return birds.indexOf(username) !== -1;
             },
 
             onDeleteFlock: function(evt) {
@@ -198,20 +209,20 @@
                 this.birds = flock.birds;
             },
 
-            onJoinFlockError: function(err) {
-                console.error(err);
+            onJoinFlockError: function(evt) {
                 // dom-if wrapped node, need to search for it
                 this.$$('#joinLeaveButton').active = false;
                 this.fire('error', {
-                    text: 'Oops! Trouble joining the flock'
+                    text: 'Oops! Trouble joining the flock',
+                    request: evt.detail.request
                 });
             },
 
-            onLeaveFlockError: function(err) {
-                console.error(err);
+            onLeaveFlockError: function(evt) {
                 this.$$('#joinLeaveButton').active = true;
                 this.fire('error', {
-                    text: 'Oops! Trouble leaving the flock'
+                    text: 'Oops! Trouble leaving the flock',
+                    request: evt.detail.request
                 });
             }
         });

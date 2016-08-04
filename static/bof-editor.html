@@ -98,10 +98,10 @@
                 this.fire('commit');
             },
 
-            onError: function(err) {
-                console.error(err);
+            onError: function(evt) {
                 this.fire('error', {
-                    text: 'Oops! Trouble saving the flock'
+                    text: 'Oops! Trouble saving the flock',
+                    request: evt.detail.request
                 });
             }
         });
