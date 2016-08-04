@@ -25,13 +25,36 @@
                 color: #fff;
             }
 
-            .logo {
-                height: 50px;
+            bof-card {
+                max-width: 100%;
+                width: 600px;
+                margin: 10px auto;
+                padding: 10px;
+                border-radius: 5px;
+                overflow: hidden;
             }
 
             paper-dialog {
                 max-width: 80%;
                 width: 600px;
+            }
+
+            .logo {
+                height: 50px;
+            }
+
+            .engraved {
+                margin-top: 2em;
+                text-align: center;
+                font-size: 28px;
+                font-weight: bold;
+                background-color: #666;
+                -webkit-background-clip: text;
+                -moz-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                text-shadow: rgba(255,255,255,0.4) 0px 2px 2px;
+
             }
         </style>
 
@@ -42,19 +65,24 @@
                 <app-toolbar>
                     <img class="logo" src="http://pydata.it/img/logo.png" />
                     <div title>Birds of a Feather</div>
-                    <paper-icon-button on-tap="onNewFlock" icon="add-circle-outline">Start a Flock</paper-icon-button>
+                    <paper-icon-button on-tap="onNewFlock" alt="Start a Flock" icon="add">Start a Flock</paper-icon-button>
                 </app-toolbar>
             </app-header>
 
             <div class="vertical layout">
-                <template is="dom-repeat" items="[[flocks.results]]">
-                    <bof-card id="[[item.id]]"
-                              name="[[item.name]]"
-                              description="[[item.description]]"
-                              when="[[item.when]]"
-                              where="[[item.where]]"
-                              leader="[[item.leader]]"
-                              birds="[[item.birds]]"></bof-card>
+                <template is="dom-if" if="[[flocks.results.length]]">
+                    <template is="dom-repeat" items="[[flocks.results]]">
+                        <bof-card id="[[item.id]]"
+                                  name="[[item.name]]"
+                                  description="[[item.description]]"
+                                  when="[[item.when]]"
+                                  where="[[item.where]]"
+                                  leader="[[item.leader]]"
+                                  birds="[[item.birds]]"></bof-card>
+                    </template>
+                </template>
+                <template is="dom-if" if="[[!flocks.results.length]]">
+                    <p class="engraved">No flocks yet.<br />Want to fly first?</p>
                 </template>
             </div>
         </app-header-layout>
@@ -63,7 +91,7 @@
               id="flockForm"
               on-iron-form-response="onNewFlockResponse"
               on-iron-form-error="onNewFlockError"
-              method="post" action="/api/flocks"
+              method="POST" action="/api/flocks"
               content-type="application/json">
             <paper-dialog id="flockDialog" modal>
                 <h2>Start a Flock</h2>
