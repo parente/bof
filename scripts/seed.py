@@ -1,3 +1,5 @@
+# Copyright (c) Peter Parente
+# Distributed under the terms of the BSD 2-Clause License.
 import sys
 sys.path.append('./')
 from app import *

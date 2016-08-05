@@ -1,3 +1,5 @@
+# Copyright (c) Peter Parente
+# Distributed under the terms of the BSD 2-Clause License.
 import os
 from flask import (Flask, render_template, jsonify, request, url_for, session,
     redirect)
