@@ -30,6 +30,7 @@ Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a v
 * Format the bird list on the cards
 * Highlight name field when there's a duplicate flock name error
 * Enter key should submit form
+* Continue showing last fetched list of flocks when refresh fails
 
 ### Questions
 

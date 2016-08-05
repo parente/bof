@@ -74,7 +74,10 @@
             }
         </style>
 
-        <iron-ajax auto id="flockList" url="/api/flocks" handle-as="json" last-response="{{flocks}}"></iron-ajax>
+        <iron-ajax auto id="flockList"
+                        url="/api/flocks"
+                        handle-as="json"
+                        last-response="{{flocks}}"></iron-ajax>
 
         <app-header-layout>
             <app-header effects="waterfall" fixed>
