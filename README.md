@@ -13,8 +13,9 @@ Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a v
 * [X] As an authenticated user, I want to join a flock
 * [X] As an authenticated user, I want to leave a flock
 * [X] As an authenticated user, I want to edit my flock details
-* [ ] As an admin, I want to seed suggested flock locations
+* [X] As an authenticated user, I need a busy indicator while my actions are in flight
 * [ ] As an admin, I want to deploy the app
+* [ ] As an admin, I want to seed suggested flock locations
 * [ ] As an admin, I want control over content
 * [ ] As an admin, I want control over users accounts
 

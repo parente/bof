@@ -75,7 +75,7 @@
             }
 
             paper-fab[active] {
-                color: red;
+                color: #ee9041;
             }
         </style>
 
@@ -201,6 +201,8 @@
             },
 
             onJoinLeaveFlock: function(evt) {
+                this.fire('busy');
+                this.$$('#joinLeaveButton').disabled = true;
                 if(Polymer.dom(evt).localTarget.active) {
                     this.$.joinFlock.generateRequest();
                 } else {
@@ -209,13 +211,19 @@
             },
 
             onJoinLeaveFlockResponse: function(evt) {
+                this.fire('idle');
+                this.$$('#joinLeaveButton').disabled = false;
                 var flock = Polymer.dom(evt).localTarget.lastResponse;
                 this.birds = flock.birds;
             },
 
             onJoinFlockError: function(evt) {
+                this.fire('idle');
                 // dom-if wrapped node, need to search for it
-                this.$$('#joinLeaveButton').active = false;
+                var button = this.$$('#joinLeaveButton');
+                button.disabled = false;
+                button.active = false;
+
                 this.fire('error', {
                     text: 'Oops! Trouble joining the flock',
                     request: evt.detail.request
@@ -223,7 +231,11 @@
             },
 
             onLeaveFlockError: function(evt) {
-                this.$$('#joinLeaveButton').active = true;
+                this.fire('idle');
+                var button = this.$$('#joinLeaveButton');
+                button.disabled = false;
+                button.active = true;
+
                 this.fire('error', {
                     text: 'Oops! Trouble leaving the flock',
                     request: evt.detail.request

@@ -14,6 +14,7 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-menu/paper-menu.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-item/paper-item.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-progress/paper-progress.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/paper-styles.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/classes/global.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-toast/paper-toast.html">
@@ -28,7 +29,7 @@
     <template>
         <style>
             app-header {
-                background-color: #0078ae;
+                background-color: #008cba;
                 color: #fff;
             }
 
@@ -54,6 +55,13 @@
                 margin: auto;
             }
 
+            paper-progress {
+                display: block;
+                width: 100%;
+                --paper-progress-active-color: #ee9041;
+                --paper-progress-container-color: transparent;
+            }
+
             .logo {
                 --iron-icon-height: 50px;
                 --iron-icon-width: 50px;
@@ -74,10 +82,12 @@
             }
         </style>
 
-        <iron-ajax auto id="flockList"
-                        url="/api/flocks"
-                        handle-as="json"
-                        last-response="{{flocks}}"></iron-ajax>
+        <iron-ajax id="flockList"
+                   url="/api/flocks"
+                   handle-as="json"
+                   on-response="onRefreshed"
+                   on-error="onRefreshed"
+                   last-response="{{flocks}}"></iron-ajax>
 
         <app-header-layout>
             <app-header effects="waterfall" fixed>
@@ -101,6 +111,7 @@
                                            icon="exit-to-app"></paper-icon-button>
                         <paper-tooltip for="logoutButton" offset="0" position="left">Logout [[username]]</paper-tooltip>
                     </template>
+                    <paper-progress id="busy" disabled indeterminate bottom-item></paper-progress>
                 </app-toolbar>
             </app-header>
 
@@ -115,6 +126,8 @@
                                   leader="[[item.leader]]"
                                   birds="[[item.birds]]"
                                   username="[[username]]"
+                                  on-busy="onBusy"
+                                  on-idle="onIdle"
                                   on-edit-flock="onEditFlock"
                                   on-delete-flock="onDeleteFlock"
                                   on-error="onError"></bof-card>
@@ -126,8 +139,16 @@
             </div>
         </app-header-layout>
 
-        <bof-editor id="flockEditor" on-commit="onRefresh" on-error="onError"></bof-editor>
-        <bof-deleter id="flockDeleter" on-commit="onRefresh" on-error="onError"></bof-deleter>
+        <bof-editor id="flockEditor"
+                    on-busy="onBusy"
+                    on-idle="onIdle"
+                    on-commit="onRefresh"
+                    on-error="onError"></bof-editor>
+        <bof-deleter id="flockDeleter"
+                     on-busy="onBusy"
+                     on-idle="onIdle"
+                     on-commit="onRefresh"
+                     on-error="onError"></bof-deleter>
         <bof-login id="flockLogin"></bof-login>
 
         <paper-toast id="burntToast"></paper-toast>
@@ -146,7 +167,16 @@
                     value: '/static/images/logo.png'
                 },
                 username: String,
-                avatarUrl: String
+                avatarUrl: String,
+                busyCount: {
+                    type: Number,
+                    readOnly: true,
+                    value: 0
+                }
+            },
+
+            ready: function() {
+                this.onRefresh();
             },
 
             onNewFlock: function() {
@@ -181,7 +211,12 @@
             },
 
             onRefresh: function(evt) {
+                this.onBusy();
                 this.$.flockList.generateRequest();
+            },
+
+            onRefreshed: function(evt) {
+                this.onIdle();
             },
 
             onError: function(evt) {
@@ -196,6 +231,21 @@
             onLogout: function(evt) {
                 document.body.setAttribute('unresolved', true);
                 window.location = '/logout';
+            },
+
+            onBusy: function() {
+                this._setBusyCount(this.busyCount + 1);
+                this.$.busy.disabled = false;
+                console.log('busy: busyCount', this.busyCount);
+            },
+
+            onIdle: function() {
+                console.log('idle: busyCount', this.busyCount);
+                this._setBusyCount(this.busyCount - 1);
+                if(this.busyCount <= 0) {
+                    this._setBusyCount(0);
+                    this.$.busy.disabled = true;
+                }
             }
         });
     </script>

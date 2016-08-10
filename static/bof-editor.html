@@ -84,6 +84,7 @@
             },
 
             onOpened: function(value) {
+                this.$$('paper-button').disabled = false;
                 this.$.dialog.opened = value;
             },
 
@@ -93,16 +94,30 @@
 
             onSubmit: function(evt) {
                 evt.preventDefault();
+                Polymer.dom(this.root)
+                    .querySelectorAll('paper-button')
+                    .forEach(function(button) {
+                        button.disabled = true;
+                    });
+                this.fire('busy');
                 this.$.form.submit();
             },
 
             onResponse: function(evt) {
                 this.$.form.reset();
                 this.$.dialog.opened = false;
+                Polymer.dom(this.root)
+                    .querySelectorAll('paper-button')
+                    .forEach(function(button) {
+                        button.disabled = false;
+                    });
+                this.fire('idle');
                 this.fire('commit');
             },
 
             onError: function(evt) {
+                this.$$('paper-button').disabled = false;
+                this.fire('idle');
                 this.fire('error', {
                     text: 'Oops! Trouble saving the flock',
                     request: evt.detail.request

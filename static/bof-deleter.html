@@ -44,15 +44,18 @@
             onClosed: function(evt) {
                 this.opened = false;
                 if(evt.detail.confirmed) {
+                    this.fire('busy');
                     this.$.deleteFlock.generateRequest();
                 }
             },
 
             onResponse: function(evt) {
+                this.fire('idle');
                 this.fire('commit');
             },
 
             onError: function(evt) {
+                this.fire('idle');
                 this.fire('error', {
                     text: 'Oops! Trouble deleting the flock',
                     request: evt.detail.request
