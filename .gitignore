@@ -60,3 +60,5 @@ target/
 __pycache__/
 .DS_Store
 .*
+prod-manifest.yml
+dev-manifest.yml
