@@ -8,6 +8,7 @@ from flask_oauthlib.client import OAuth
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', os.urandom(24))
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI',
     'sqlite:////tmp/bof.db')
 title = os.getenv('APP_TITLE', 'Birds of a Feather')
@@ -23,7 +24,7 @@ birds_table = db.Table('birds',
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(128), unique=True)
+    username = db.Column(db.String(128), unique=True, index=True)
     banned = db.Column(db.Boolean, default=False)
     admin = db.Column(db.Boolean, default=False)
 
@@ -41,7 +42,7 @@ class User(db.Model):
 
 class Flock(db.Model):
     __tablename__ = 'flock'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, index=True)
     name = db.Column(db.String(64), unique=True)
     description = db.Column(db.String(256))
     where = db.Column(db.String(64))
