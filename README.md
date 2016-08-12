@@ -2,6 +2,35 @@
 
 Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a venue
 
+## Development
+
+```
+cd bof
+pip install -r requirements.txt
+FLASK_APP=bof/__init__.py FLASK_DEBUG=1 flask run
+```
+
+## Deploy to Cloud Foundry
+
+Create a manifest.yml that inherits from base-manifest.yml:
+
+```
+applications:
+- name: bof
+  host: bof
+  env:
+    GITHUB_CLIENT_ID: 'replace with GitHub OAuth client ID'
+    GITHUB_CLIENT_SECRET: 'replace with GitHub OAuth secret'
+    SECRET_KEY: 'replace with a random string'
+    SQLALCHEMY_DATABASE_URI: 'postgresql+pg8000://username:password@host:port/database'
+```
+
+Push it.
+
+```
+cf push
+```
+
 ## Use Cases
 
 ### MVP
@@ -32,6 +61,7 @@ Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a v
 * Highlight name field when there's a duplicate flock name error
 * Enter key should submit form
 * Continue showing last fetched list of flocks when refresh fails
+* favicon
 
 ### Questions
 
