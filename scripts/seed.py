@@ -2,7 +2,7 @@
 # Distributed under the terms of the BSD 2-Clause License.
 import sys
 sys.path.append('./')
-from app import *
+from bof.model import *
 
 db.drop_all()
 db.create_all()
