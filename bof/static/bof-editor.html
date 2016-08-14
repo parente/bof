@@ -18,6 +18,7 @@
         </style>
         <form is="iron-form"
               id="form"
+              on-iron-form-invalid="onInvalid"
               on-iron-form-response="onResponse"
               on-iron-form-error="onError"
               method="POST"
@@ -83,6 +84,14 @@
                 return this.fid === '' ? 'Start a Flock' : 'Edit a Flock';
             },
 
+            disableButtons: function(state) {
+                Polymer.dom(this.root)
+                    .querySelectorAll('paper-button')
+                    .forEach(function(button) {
+                        button.disabled = state;
+                    });
+            },
+
             onOpened: function(value) {
                 this.$$('paper-button').disabled = false;
                 this.$.dialog.opened = value;
@@ -94,11 +103,7 @@
 
             onSubmit: function(evt) {
                 evt.preventDefault();
-                Polymer.dom(this.root)
-                    .querySelectorAll('paper-button')
-                    .forEach(function(button) {
-                        button.disabled = true;
-                    });
+                this.disableButtons(true);
                 this.fire('busy');
                 this.$.form.submit();
             },
@@ -106,17 +111,17 @@
             onResponse: function(evt) {
                 this.$.form.reset();
                 this.$.dialog.opened = false;
-                Polymer.dom(this.root)
-                    .querySelectorAll('paper-button')
-                    .forEach(function(button) {
-                        button.disabled = false;
-                    });
+                this.disableButtons(false);
                 this.fire('idle');
                 this.fire('commit');
             },
 
+            onInvalid: function(evt) {
+                this.disableButtons(false);
+            },
+
             onError: function(evt) {
-                this.$$('paper-button').disabled = false;
+                this.disableButtons(false);
                 this.fire('idle');
                 this.fire('error', {
                     text: 'Oops! Trouble saving the flock',
