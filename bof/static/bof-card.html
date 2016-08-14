@@ -59,6 +59,10 @@
                 margin-bottom: 1em;
             }
 
+            .details.birds span {
+                padding-right: 0.25em;
+            }
+
             .details-group {
                 margin-right: 10px;
             }
@@ -145,7 +149,7 @@
                   <a href="https://github.com/[[leader]]" target="_blank" rel="noopener noreferrer">[[leader]]</a> started the flock</span>
                 </span>
                 </div>
-                <div class="details">
+                <div class="details birds">
                     <iron-icon icon="social:group"></iron-icon>
                     <template is="dom-if" if="[[birds.length]]">
                         <template is="dom-repeat" items="[[birds]]">
