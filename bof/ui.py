@@ -42,6 +42,9 @@ def authorized():
         user = User(username)
         db.session.add(user)
         db.session.commit()
+    elif user.banned:
+        # clear the session if the user is banned
+        session.clear()
 
     return redirect(url_for('ui.index'))
 

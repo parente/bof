@@ -1,10 +1,27 @@
 # Copyright (c) Peter Parente
 # Distributed under the terms of the BSD 2-Clause License.
-from flask import Blueprint, jsonify, request, session
+from functools import wraps
+from flask import Blueprint, jsonify, request, session, g
 from .model import db, User, Flock
 from .auth import unauthorized
 
 api_bp = Blueprint('api', __name__)
+
+
+def require_auth(f):
+    @wraps(f)
+    def _require_auth(*args, **kwargs):
+        try:
+            username = session['username']
+        except KeyError:
+            return unauthorized('action requires authentication')
+        user = User.query.filter_by(username=username).first()
+        # banned users are not authenticated
+        if user.banned:
+            return unauthorized('user is banned')
+        g.user = user
+        return f(*args, **kwargs)
+    return _require_auth
 
 
 @api_bp.route('/api/flocks')
@@ -16,21 +33,14 @@ def list_flocks():
 
 
 @api_bp.route('/api/flocks', methods=['POST'])
+@require_auth
 def create_flock():
     content = request.json
-
-    # authenticated user is the leader of the flock
-    try:
-        username = session['username']
-    except KeyError:
-        return unauthorized('must be logged in to create a flock')
-    user = User.query.filter_by(username=username).first()
-
     flock = Flock(name=content['name'],
                   description=content['description'],
                   where=content['where'],
                   when=content['when'],
-                  leader=user)
+                  leader=g.user)
     db.session.add(flock)
     db.session.commit()
 
@@ -39,20 +49,14 @@ def create_flock():
 
 # need to support POST because polymer doesn't send JSON bodies with PUT
 @api_bp.route('/api/flocks/<fid>', methods=['PUT', 'POST'])
+@require_auth
 def update_flock(fid):
     content = request.json
 
-    # authenticated user is the leader of the flock
-    try:
-        username = session['username']
-    except KeyError:
-        return unauthorized('must be logged in to update a flock')
-    user = User.query.filter_by(username=username).first()
-
     # check if user has access to update
     flock = Flock.query.get(fid)
-    if flock.leader.username != username and not user.admin:
-        return unauthorized('{} cannot delete flock'.format(username))
+    if flock.leader.username != g.user.username and not g.user.admin:
+        return unauthorized('{} cannot update flock'.format(g.user.username))
 
     flock.name = content.get('name', flock.name)
     flock.description = content.get('description', flock.name)
@@ -64,18 +68,12 @@ def update_flock(fid):
 
 
 @api_bp.route('/api/flocks/<fid>', methods=['DELETE'])
+@require_auth
 def delete_flock(fid):
-    # authenticated user is the leader of the flock
-    try:
-        username = session['username']
-    except KeyError:
-        return unauthorized('must be logged in to delete a flock')
-    user = User.query.filter_by(username=username).first()
-
     # check if user has access to delete
     flock = Flock.query.get(fid)
-    if flock.leader.username != username and not user.admin:
-        return unauthorized('{} cannot delete flock'.format(username))
+    if flock.leader.username != g.user.username and not g.user.admin:
+        return unauthorized('{} cannot delete flock'.format(g.user.username))
 
     db.session.delete(flock)
     db.session.commit()
@@ -83,34 +81,22 @@ def delete_flock(fid):
 
 
 @api_bp.route('/api/flocks/<fid>/birds', methods=['POST'])
+@require_auth
 def join_flock(fid):
-    # authenticated user is the leader of the flock
-    try:
-        username = session['username']
-    except KeyError:
-        return unauthorized('must be logged in to join a flock')
-    user = User.query.filter_by(username=username).first()
-
     flock = Flock.query.get(fid)
-    if username not in flock.birds:
-        flock.birds.append(user)
+    if g.user not in flock.birds:
+        flock.birds.append(g.user)
     db.session.commit()
 
     return (jsonify(flock.to_dict()), 200)
 
 
 @api_bp.route('/api/flocks/<fid>/birds/self', methods=['DELETE'])
+@require_auth
 def leave_flock(fid):
-    # authenticated user is the leader of the flock
-    try:
-        username = session['username']
-    except KeyError:
-        return unauthorized('must be logged in to leave a flock')
-    user = User.query.filter_by(username=username).first()
-
     flock = Flock.query.get(fid)
-    if user in flock.birds:
-        flock.birds.remove(user)
+    if g.user in flock.birds:
+        flock.birds.remove(g.user)
     db.session.commit()
 
     return (jsonify(flock.to_dict()), 200)
