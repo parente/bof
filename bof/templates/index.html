@@ -10,6 +10,12 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
         <title>{{title}}</title>
+        <link rel="shortcut icon"
+              href="{{ url_for('ui.static', filename='images/favicon.ico') }}"
+              type="image/x-icon">
+        <link rel="icon"
+              href="{{ url_for('ui.static', filename='images/favicon.ico') }}"
+              type="image/x-icon">
         <script src="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/webcomponentsjs/webcomponents-lite.min.js"></script>
         <link rel="import" href="static/bof-app.html">
         <style>
@@ -22,7 +28,7 @@
     <body unresolved>
         <bof-app id="app"
                  title="{{title}}"
-                 logo-url="{{logo_url}}"
+                 logo-url="{{ url_for('ui.static', filename='images/logo.png') }}"
                  username="{{username}}"
                  avatar-url="{{avatar_url}}"></bof-app>
     </body>

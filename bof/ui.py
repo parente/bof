@@ -58,9 +58,6 @@ def get_github_oauth_token():
 def index():
     username = session.get('username', '')
     avatar_url = session.get('avatar_url', '')
-    logo_url = (current_app.config['APP_LOGO_URL'] or
-                url_for('static', filename='images/logo.png'))
     return render_template('index.html', username=username,
                            avatar_url=avatar_url,
-                           title=current_app.config['APP_TITLE'],
-                           logo_url=logo_url)
+                           title=current_app.config['APP_TITLE'])

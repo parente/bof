@@ -13,7 +13,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI',
                                                   'sqlite:////tmp/bof.db')
 app.config['APP_TITLE'] = os.getenv('APP_TITLE', 'Birds of a Feather')
-app.config['APP_LOGO_URL'] = os.getenv('APP_LOGO_URL')
 app.config['GITHUB_CONSUMER_KEY'] = os.getenv('GITHUB_CONSUMER_KEY')
 app.config['GITHUB_CONSUMER_SECRET'] = os.getenv('GITHUB_CONSUMER_SECRET')
 
