@@ -71,8 +71,7 @@ def list():
 
 
 @flock.command()
-@click.option('--id', prompt='Flock ID', type=int,
-              help='Remove this flock ID.')
+@click.argument('id')
 @click.confirmation_option(prompt='Are you sure you want to delete the flock?')
 def remove(id):
     """Remove a flock."""
@@ -83,9 +82,16 @@ def remove(id):
 
 
 @flock.command()
-def edit():
+@click.argument('id')
+def edit(id):
     """Edit a flock."""
-    pass
+    with app.app_context():
+        flock = Flock.query.get(id)
+        flock.name = click.prompt('Name', default=flock.name)
+        flock.description = click.prompt('Description',
+                                         default=flock.description)
+        db.session.commit()
+
 
 if __name__ == '__main__':
     admin()
