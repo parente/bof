@@ -46,7 +46,7 @@ cf push
 * [X] As an admin, I want to deploy the app
 * [ ] As an admin, I want to seed suggested flock locations
 * [ ] As an admin, I want control over content
-* [ ] As an admin, I want control over users accounts
+* [X] As an admin, I want control over users accounts
 
 ### Bonus
 
@@ -57,11 +57,8 @@ cf push
 
 ### Nits
 
-* Format the bird list on the cards
 * Highlight name field when there's a duplicate flock name error
-* Enter key should submit form
 * Continue showing last fetched list of flocks when refresh fails
-* favicon
 
 ### Questions
 
