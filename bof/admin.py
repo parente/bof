@@ -58,5 +58,34 @@ def flock():
     """Manage flocks."""
     pass
 
+
+@flock.command()
+def list():
+    """List all flocks."""
+    table = PrettyTable(['id', 'name', 'leader', 'birds'])
+    with app.app_context():
+        for flock in Flock.query.all():
+            table.add_row([flock.id, flock.name, flock.leader.username,
+                           len(flock.birds)])
+    click.echo(table)
+
+
+@flock.command()
+@click.option('--id', prompt='Flock ID', type=int,
+              help='Remove this flock ID.')
+@click.confirmation_option(prompt='Are you sure you want to delete the flock?')
+def remove(id):
+    """Remove a flock."""
+    with app.app_context():
+        flock = Flock.query.get(id)
+        db.session.delete(flock)
+        db.session.commit()
+
+
+@flock.command()
+def edit():
+    """Edit a flock."""
+    pass
+
 if __name__ == '__main__':
     admin()
