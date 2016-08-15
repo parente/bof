@@ -62,3 +62,4 @@ __pycache__/
 .*
 prod-manifest.yml
 dev-manifest.yml
+manifest.yml

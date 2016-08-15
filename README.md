@@ -15,6 +15,8 @@ FLASK_APP=bof/__init__.py FLASK_DEBUG=1 flask run
 Create a manifest.yml that inherits from base-manifest.yml:
 
 ```
+---
+inherit: base-manifest.yml
 applications:
 - name: bof
   host: bof
