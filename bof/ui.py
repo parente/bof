@@ -1,8 +1,9 @@
 # Copyright (c) Peter Parente
 # Distributed under the terms of the BSD 2-Clause License.
+import json
 from flask import (Blueprint, render_template, request, session, url_for,
                    redirect, current_app)
-from .model import User, db
+from .model import User, Location, db
 from .auth import unauthorized, github
 
 ui_bp = Blueprint('ui', __name__, static_folder='static')
@@ -59,8 +60,11 @@ def get_github_oauth_token():
 
 @ui_bp.route('/')
 def index():
+    locations = [loc.name for loc in Location.query.all()]
     username = session.get('username', '')
     avatar_url = session.get('avatar_url', '')
-    return render_template('index.html', username=username,
+    return render_template('index.html',
+                           locations=json.dumps(locations),
+                           username=username,
                            avatar_url=avatar_url,
                            title=current_app.config['APP_TITLE'])

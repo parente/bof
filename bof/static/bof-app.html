@@ -140,6 +140,7 @@
         </app-header-layout>
 
         <bof-editor id="flockEditor"
+                    locations="[[locations]]"
                     on-busy="onBusy"
                     on-idle="onIdle"
                     on-commit="onRefresh"
@@ -172,7 +173,8 @@
                     type: Number,
                     readOnly: true,
                     value: 0
-                }
+                },
+                locations: Array
             },
 
             ready: function() {

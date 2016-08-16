@@ -177,6 +177,11 @@ def examples():
         f2.birds.append(foobar)
         db.session.commit()
 
+        db.session.add(Location('front door'))
+        db.session.add(Location('back door'))
+        db.session.add(Location('lobby'))
+        db.session.commit()
+
 
 @data.command()
 def reset():

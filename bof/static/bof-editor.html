@@ -42,15 +42,22 @@
                                  value="{{description}}"
                                  char-counter required></paper-input>
                     <paper-input name="when"
-                                 label="When do you want to meet?"
+                                 label="State a day and time to meet"
                                  maxlength="64"
                                  value="{{when}}"
                                  char-counter required></paper-input>
                     <paper-input name="where"
-                                 label="Where do you want to meet?"
+                                 label="Name or choose a place to meet"
                                  maxlength="64"
                                  value="{{where}}"
+                                 list="locations"
+                                 autocomplete="on"
                                  char-counter required></paper-input>
+                    <datalist id="locations">
+                        <template is="dom-repeat" items="[[locations]]">
+                            <option value="[[item]]" />
+                        </template>
+                    </datalist>
                 </paper-dialog-scrollable>
                 <div class="buttons">
                     <paper-button dialog-dismiss>Cancel</paper-button>
@@ -78,6 +85,7 @@
                 description: String,
                 when: String,
                 where: String,
+                locations: Array,
                 _form : {
                     type: Object,
                     value: function() {
