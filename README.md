@@ -55,7 +55,7 @@ python -m bof.admin --help
 * [X] As an authenticated user, I want to edit my flock details
 * [X] As an authenticated user, I need a busy indicator while my actions are in flight
 * [X] As an admin, I want to deploy the app
-* [ ] As an admin, I want to seed suggested flock locations
+* [X] As an admin, I want to seed suggested flock locations
 * [X] As an admin, I want control over content
 * [X] As an admin, I want control over users accounts
 
