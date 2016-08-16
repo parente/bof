@@ -21,16 +21,25 @@ applications:
 - name: bof
   host: bof
   env:
-    GITHUB_CLIENT_ID: 'replace with GitHub OAuth client ID'
-    GITHUB_CLIENT_SECRET: 'replace with GitHub OAuth secret'
+    GITHUB_CONSUMER_KEY: 'replace with GitHub OAuth client ID'
+    GITHUB_CONSUMER_SECRET: 'replace with GitHub OAuth secret'
     SECRET_KEY: 'replace with a random string'
     SQLALCHEMY_DATABASE_URI: 'postgresql+pg8000://username:password@host:port/database'
+    SQLALCHEMY_POOL_SIZE: 1     # per worker
 ```
 
 Push it.
 
 ```
 cf push
+```
+
+## Manage the Database
+
+Set the `SQLALCHEMY_DATABASE_URI` in your environment. Then run:
+
+```
+python -m bof.admin --help
 ```
 
 ## Use Cases
@@ -61,7 +70,3 @@ cf push
 
 * Highlight name field when there's a duplicate flock name error
 * Continue showing last fetched list of flocks when refresh fails
-
-### Questions
-
-* What happens on transaction conflicts (e.g., update a flock while someone joins)?

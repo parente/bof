@@ -5,15 +5,4 @@ memory: 512M
 instances: 2
 path: .
 buildpack: https://github.com/cloudfoundry/buildpack-python.git
-command: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
-
-# Create dev-manifest.yml and/or prod-manifest.yml which inherit from this
-# base manifest and define the following application metadata.
-# applications:
-# - name: bof
-#  host: bof
-#  env:
-#    GITHUB_CLIENT_ID: 'replace with GitHub OAuth client ID'
-#    GITHUB_CLIENT_SECRET: 'replace with GitHub OAuth secret'
-#    SECRET_KEY: 'replace with a random string'
-#    SQLALCHEMY_DATABASE_URI: 'postgresql+pg8000://username:password@host:port/database'
+command: gunicorn -w 2 -b 0.0.0.0:$PORT bof:app
