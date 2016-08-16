@@ -16,8 +16,11 @@ def require_auth(f):
         except KeyError:
             return unauthorized('action requires authentication')
         user = User.query.filter_by(username=username).first()
+        # stale user reference
+        if user is None:
+            return unauthorized('user does not exist')
         # banned users are not authenticated
-        if user.banned:
+        elif user.banned:
             return unauthorized('user is banned')
         g.user = user
         return f(*args, **kwargs)
