@@ -47,7 +47,7 @@ cf push
 * [X] As an authenticated user, I need a busy indicator while my actions are in flight
 * [X] As an admin, I want to deploy the app
 * [ ] As an admin, I want to seed suggested flock locations
-* [ ] As an admin, I want control over content
+* [X] As an admin, I want control over content
 * [X] As an admin, I want control over users accounts
 
 ### Bonus
