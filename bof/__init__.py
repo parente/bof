@@ -2,6 +2,7 @@
 # Distributed under the terms of the BSD 2-Clause License.
 import os
 from flask import Flask
+from flask_sslify import SSLify
 from .model import db
 from .auth import oauth
 from .ui import ui_bp
@@ -21,3 +22,5 @@ app.register_blueprint(ui_bp)
 
 db.init_app(app)
 oauth.init_app(app)
+if 'VCAP_SERVICES' in os.environ:
+    SSLify(app)
