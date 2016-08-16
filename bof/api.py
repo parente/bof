@@ -42,7 +42,10 @@ def create_flock():
                   when=content['when'],
                   leader=g.user)
     db.session.add(flock)
-    db.session.commit()
+    try:
+        db.session.commit()
+    finally:
+        db.session.rollback()
 
     return (jsonify(flock.to_dict()), 201)
 
@@ -62,7 +65,10 @@ def update_flock(fid):
     flock.description = content.get('description', flock.name)
     flock.when = content.get('when', flock.when)
     flock.where = content.get('where', flock.where)
-    db.session.commit()
+    try:
+        db.session.commit()
+    finally:
+        db.session.rollback()
 
     return (jsonify(flock.to_dict()), 200)
 
@@ -76,7 +82,11 @@ def delete_flock(fid):
         return unauthorized('{} cannot delete flock'.format(g.user.username))
 
     db.session.delete(flock)
-    db.session.commit()
+    try:
+        db.session.commit()
+    finally:
+        db.session.rollback()
+
     return '', 204
 
 
@@ -86,7 +96,10 @@ def join_flock(fid):
     flock = Flock.query.get(fid)
     if g.user not in flock.birds:
         flock.birds.append(g.user)
-    db.session.commit()
+    try:
+        db.session.commit()
+    finally:
+        db.session.rollback()
 
     return (jsonify(flock.to_dict()), 200)
 
@@ -97,6 +110,9 @@ def leave_flock(fid):
     flock = Flock.query.get(fid)
     if g.user in flock.birds:
         flock.birds.remove(g.user)
-    db.session.commit()
+    try:
+        db.session.commit()
+    finally:
+        db.session.rollback()
 
     return (jsonify(flock.to_dict()), 200)

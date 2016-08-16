@@ -41,7 +41,10 @@ def authorized():
     if user is None:
         user = User(username)
         db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.commit()
+        finally:
+            db.session.rollback()
     elif user.banned:
         # clear the session if the user is banned
         session.clear()
