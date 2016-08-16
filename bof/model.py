@@ -60,3 +60,18 @@ class Flock(db.Model):
             'leader': self.leader.username,
             'birds': [bird.username for bird in self.birds]
         }
+
+
+class Location(db.Model):
+    __tablename__ = 'locations'
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    name = db.Column(db.String(64), unique=True)
+
+    def __init__(self, name):
+        self.name = name
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name
+        }

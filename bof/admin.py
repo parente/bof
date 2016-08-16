@@ -4,7 +4,7 @@
 import click
 from prettytable import PrettyTable
 from . import app
-from .model import db, User, Flock
+from .model import db, User, Flock, Location
 
 
 @click.group()
@@ -90,6 +90,45 @@ def edit(id):
         flock.name = click.prompt('Name', default=flock.name)
         flock.description = click.prompt('Description',
                                          default=flock.description)
+        db.session.commit()
+
+
+@admin.group()
+def location():
+    """Manage location suggestions."""
+    pass
+
+
+@location.command()
+def list():
+    """List location suggestions."""
+    table = PrettyTable(['id', 'name'])
+    with app.app_context():
+        for loc in Location.query.all():
+            table.add_row([loc.id, loc.name])
+    click.echo(table)
+
+
+@location.command()
+@click.option('--name', '-n', prompt='Location name', help='Location name')
+def add(name):
+    """Add a location suggestion."""
+    with app.app_context():
+        loc = Location(name)
+        db.session.add(loc)
+        db.session.commit()
+        id = loc.id
+    click.echo('Created location {}'.format(id))
+
+
+@location.command()
+@click.argument('id')
+@click.confirmation_option(prompt='Are you sure you want to delete this location?')
+def remove(id):
+    """Remove a location suggestion."""
+    with app.app_context():
+        loc = Location.query.get(id)
+        db.session.delete(loc)
         db.session.commit()
 
 
