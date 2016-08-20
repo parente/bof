@@ -64,9 +64,7 @@ python -m bof.admin --help
 * As a user, I want to see flock updates without refreshing
 * As a user, I want to authenticate with a service other than GitHub
 * As an authenticated user, I want to join my flock with another
-* As an authenticated user, I want to spruce up my flock card with an image
 
 ### Nits
 
 * Highlight name field when there's a duplicate flock name error
-* Continue showing last fetched list of flocks when refresh fails
