@@ -87,7 +87,8 @@
                    handle-as="json"
                    on-response="onRefreshed"
                    on-error="onRefreshed"
-                   last-response="{{flocks}}"></iron-ajax>
+                   last-response="{{flocks}}"
+                   last-error="{{flockError}}"></iron-ajax>
 
         <app-header-layout>
             <app-header effects="waterfall" fixed>
@@ -134,8 +135,13 @@
                                   on-error="onError"></bof-card>
                     </template>
                 </template>
-                <template is="dom-if" if="[[!flocks.results.length]]">
-                    <p class="engraved">No flocks yet.<br />Want to lead one?</p>
+                <template is="dom-if" if="[[!flockError]]">
+                    <template is="dom-if" if="[[!flocks.results.length]]">
+                        <p class="engraved">No flocks yet.<br />Want to lead one?</p>
+                    </template>
+                </template>
+                <template is="dom-if" if="[[flockError]]">
+                    <p class="engraved">Problem loading flocks.<br />Check your connection?</p>
                 </template>
             </div>
         </app-header-layout>
