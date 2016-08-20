@@ -102,19 +102,20 @@ def location():
 @location.command()
 def list():
     """List location suggestions."""
-    table = PrettyTable(['id', 'name'])
+    table = PrettyTable(['id', 'name', 'image'])
     with app.app_context():
         for loc in Location.query.all():
-            table.add_row([loc.id, loc.name])
+            table.add_row([loc.id, loc.name, loc.image_url])
     click.echo(table)
 
 
 @location.command()
 @click.option('--name', '-n', prompt='Location name', help='Location name')
-def add(name):
+@click.option('--image_url', '-i', prompt='Location image URL', help='Location image URL')
+def add(name, image_url):
     """Add a location suggestion."""
     with app.app_context():
-        loc = Location(name)
+        loc = Location(name, image_url)
         db.session.add(loc)
         db.session.commit()
         id = loc.id
@@ -158,13 +159,13 @@ def examples():
 
         f1 = Flock(name='Jupyter and Drinks',
                    description="Let's chat about all things Jupyter",
-                   where='By the front door',
+                   where='front door',
                    when='7 pm',
                    leader=admin)
 
         f2 = Flock(name='the life of scipy',
                    description="Where are we going next?",
-                   where='By the front bar',
+                   where='back door',
                    when='7 pm',
                    leader=nobody)
 
@@ -177,9 +178,35 @@ def examples():
         f2.birds.append(foobar)
         db.session.commit()
 
-        db.session.add(Location('front door'))
-        db.session.add(Location('back door'))
-        db.session.add(Location('lobby'))
+        db.session.add(Location('front door', 'http://placehold.it/350x150'))
+        db.session.add(Location('back door', 'http://placehold.it/350x150'))
+        db.session.add(Location('lobby', ''))
+        db.session.commit()
+
+
+@data.command()
+def stress():
+    """Seed 200 card test."""
+    with app.app_context():
+        click.confirm('Are you sure you want to reset {}?'.format(db.engine),
+                      abort=True)
+        db.drop_all()
+        db.create_all()
+
+        admin = User('admin', admin=True)
+        db.session.add(admin)
+        db.session.commit()
+
+        for i in range(200):
+            f = Flock(name='Flock {}'.format(i),
+                      description='Description of flock {}'.format(i),
+                      where='front door',
+                      when='later tonight',
+                      leader=admin)
+            db.session.add(f)
+        db.session.commit()
+
+        db.session.add(Location('front door', 'http://placehold.it/350x150'))
         db.session.commit()
 
 

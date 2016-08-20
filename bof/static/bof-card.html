@@ -96,7 +96,7 @@
                     on-response="onJoinLeaveFlockResponse"
                     on-error="onLeaveFlockError"></iron-ajax>
 
-        <paper-card class="bof-card">
+        <paper-card class="bof-card" image="[[image_url]]">
             <div class="card-content">
                 <div class="heading">
                     <span class="action">
@@ -176,7 +176,8 @@
                 where: String,
                 birds: Array,
                 fid: String,
-                username: String
+                username: String,
+                image_url: String
             },
 
             isOwner: function(leader, username) {

@@ -66,12 +66,16 @@ class Location(db.Model):
     __tablename__ = 'locations'
     id = db.Column(db.Integer, primary_key=True, index=True)
     name = db.Column(db.String(64), unique=True)
+    image_url = db.Column(db.String(1024), nullable=True)
 
-    def __init__(self, name):
+    def __init__(self, name, image_url=None):
         self.name = name
+        self.image_url = image_url
 
     def to_dict(self):
         return {
             'id': self.id,
-            'name': self.name
+            'name': self.name,
+            'image_url': self.image_url
         }
+

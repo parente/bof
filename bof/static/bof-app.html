@@ -126,6 +126,7 @@
                                   leader="[[item.leader]]"
                                   birds="[[item.birds]]"
                                   username="[[username]]"
+                                  image_url="[[ getImageForLocation(item.where) ]]"
                                   on-busy="onBusy"
                                   on-idle="onIdle"
                                   on-edit-flock="onEditFlock"
@@ -174,11 +175,21 @@
                     readOnly: true,
                     value: 0
                 },
-                locations: Array
+                locations: Array,
             },
 
             ready: function() {
+                // speed lookup of location images
+                this._loc_images = {};
+                for(var i=0,k=this.locations.length; i<k; i++) {
+                    var item = this.locations[i];
+                    this._loc_images[item.name] = item.image_url;
+                }
                 this.onRefresh();
+            },
+
+            getImageForLocation: function(name) {
+                return this._loc_images[name];
             },
 
             onNewFlock: function() {

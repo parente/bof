@@ -60,7 +60,7 @@ def get_github_oauth_token():
 
 @ui_bp.route('/')
 def index():
-    locations = [loc.name for loc in Location.query.all()]
+    locations = [loc.to_dict() for loc in Location.query.all()]
     username = session.get('username', '')
     avatar_url = session.get('avatar_url', '')
     return render_template('index.html',
