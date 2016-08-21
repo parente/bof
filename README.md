@@ -1,18 +1,21 @@
 # BoF App
 
-Web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a venue
+A web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a venue
 
-## Development
+## Run for Development
 
 ```
-cd bof
-pip install -r requirements.txt
+conda env create
+source activate bof
+export GITHUB_CONSUMER_KEY='your app github key'
+export GITHUB_CONSUMER_SECRET='your app github secret'
+python -m bof.admin data examples
 FLASK_APP=bof/__init__.py FLASK_DEBUG=1 flask run
 ```
 
 ## Deploy to Cloud Foundry
 
-Create a manifest.yml that inherits from base-manifest.yml:
+Create a `dev-manifest.yml` and/or `prod-manifest.yml` that inherits from base-manifest.yml:
 
 ```
 ---
@@ -31,40 +34,21 @@ applications:
 Push it.
 
 ```
-cf push
+cf push -f dev-manifest.yml
 ```
 
-## Manage the Database
+For zero-downtime deploys, get https://github.com/contraband/autopilot, make sure you have twice the app allocated resources available, and then run:
 
-Set the `SQLALCHEMY_DATABASE_URI` in your environment. Then run:
+```
+cf zero-downtime-push bof -f dev-manifest.yml
+```
+
+If the zero-downtime deploy goes bad, just use `cf delete` to remove the botched app and `cf rename` to rename the venerable instance back to the main instance.
+
+## Administer the Database
+
+Set `SQLALCHEMY_DATABASE_URI` in your environment. Then run:
 
 ```
 python -m bof.admin --help
 ```
-
-## Use Cases
-
-### MVP
-
-* [X] As the first user, I want to see more than an empty page
-* [X] As a user, I want to see what flocks are planned, where they are meeting at the venue, when, and with whom
-* [X] As a user, I want to authenticate with GitHub in order to perform other BoF actions
-* [X] As an authenticated user, I want to propose a flock
-* [X] As an authenticated user, I want to join a flock
-* [X] As an authenticated user, I want to leave a flock
-* [X] As an authenticated user, I want to edit my flock details
-* [X] As an authenticated user, I need a busy indicator while my actions are in flight
-* [X] As an admin, I want to deploy the app
-* [X] As an admin, I want to seed suggested flock locations
-* [X] As an admin, I want control over content
-* [X] As an admin, I want control over users accounts
-
-### Bonus
-
-* As a user, I want to see flock updates without refreshing
-* As a user, I want to authenticate with a service other than GitHub
-* As an authenticated user, I want to join my flock with another
-
-### Nits
-
-* Highlight name field when there's a duplicate flock name error

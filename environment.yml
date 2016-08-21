@@ -1,0 +1,17 @@
+---
+name: bof
+channels:
+    - conda-forge
+    - defaults
+dependencies:
+    - python=3.5
+    - flask=0.11.*
+    - flask-sqlalchemy=2.1.*
+    - Flask-oauthlib=0.9.*
+    - gunicorn=19.6.*
+    - prettytable=0.7.*
+    - pip
+    - pip:
+        - pg8000==1.10.*
+        - flask-sslify==0.1.*
+
