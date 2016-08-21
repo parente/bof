@@ -141,7 +141,7 @@ def data():
 
 @data.command()
 def examples():
-    """Seed example tables."""
+    """Drop / create tables, and seed examples."""
     with app.app_context():
         click.confirm('Are you sure you want to reset {}?'.format(db.engine),
                       abort=True)
@@ -186,7 +186,7 @@ def examples():
 
 @data.command()
 def stress():
-    """Seed 200 card test."""
+    """Drop / create tables, and seed 200 card test."""
     with app.app_context():
         click.confirm('Are you sure you want to reset {}?'.format(db.engine),
                       abort=True)
@@ -211,8 +211,17 @@ def stress():
 
 
 @data.command()
+def empty():
+    """Create empty database tables."""
+    with app.app_context():
+        click.confirm('Are you sure you want to create tables in {}?'.format(db.engine),
+                      abort=True)
+        db.create_all()
+
+
+@data.command()
 def reset():
-    """Reset database."""
+    """Drop and create empty database tables."""
     with app.app_context():
         click.confirm('Are you sure you want to reset {}?'.format(db.engine),
                       abort=True)
