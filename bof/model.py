@@ -36,8 +36,8 @@ class Flock(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True)
     name = db.Column(db.String(64), unique=True)
     description = db.Column(db.String(256))
-    where = db.Column(db.String(64))
-    when = db.Column(db.String(64))
+    where = db.Column(db.String(40))
+    when = db.Column(db.String(40))
     leader_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     leader = db.relationship('User')
     birds = db.relationship('User', secondary=birds_table,
