@@ -10,10 +10,11 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-ajax/iron-ajax.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/iron-icons/iron-icons.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-menu-button/paper-menu-button.html">
-<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-menu/paper-menu.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-item/paper-item.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-fab/paper-fab.html">
+<link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-menu/paper-menu.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-progress/paper-progress.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/paper-styles.html">
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-styles/classes/global.html">
@@ -34,12 +35,16 @@
             }
 
             bof-card {
-                max-width: 95%;
-                width: 600px;
-                margin: 10px auto;
+                width: 500px;
                 padding: 10px;
+                margin: 0 auto;
                 border-radius: 5px;
                 overflow: hidden;
+            }
+
+            .horizontal.layout.wrap {
+                max-width: 1100px;
+                margin: auto;
             }
 
             bof-editor {
@@ -62,6 +67,14 @@
                 --paper-progress-container-color: transparent;
             }
 
+            paper-fab {
+                position: fixed;
+                bottom: 25px;
+                right: 25px;
+                --paper-fab-background: #ee9041;
+                --paper-fab-keyboard-focus-background: #dd8041;
+            }
+
             .logo {
                 --iron-icon-height: 50px;
                 --iron-icon-width: 50px;
@@ -69,6 +82,7 @@
 
             .engraved {
                 margin-top: 2em;
+                margin-bottom: 6em;
                 text-align: center;
                 font-size: 28px;
                 font-weight: bold;
@@ -78,7 +92,10 @@
                 background-clip: text;
                 color: transparent;
                 text-shadow: rgba(255,255,255,0.4) 0px 2px 2px;
+            }
 
+            footer {
+                margin-bottom: 3em !important;
             }
         </style>
 
@@ -99,24 +116,33 @@
                                        on-tap="onRefresh"
                                        alt="Refresh flock list"
                                        icon="refresh"></paper-icon-button>
-                    <paper-icon-button id="newButton"
-                                       on-tap="onNewFlock"
-                                       alt="Start a flock"
-                                       icon="add"></paper-icon-button>
-                    <paper-tooltip for="refreshButton" offset="0" position="left">Refresh flock list</paper-tooltip>
-                    <paper-tooltip for="newButton" offset="0" position="left">Start a flock</paper-tooltip>
+                    <paper-tooltip for="refreshButton" 
+                                   offset="0" 
+                                   position="left">Refresh flock list</paper-tooltip>
                     <template is="dom-if" if="[[username]]">
                         <paper-icon-button id="logoutButton"
                                            on-tap="onLogout"
                                            alt="Logout"
-                                           icon="exit-to-app"></paper-icon-button>
-                        <paper-tooltip for="logoutButton" offset="0" position="left">Logout [[username]]</paper-tooltip>
+                                           src="[[avatarUrl]]"></paper-icon-button>
+                        <paper-tooltip for="logoutButton" 
+                                       offset="0" 
+                                       position="left">Logout [[username]]</paper-tooltip>
                     </template>
-                    <paper-progress id="busy" disabled indeterminate bottom-item></paper-progress>
+                    <paper-progress id="busy" 
+                                    disabled indeterminate bottom-item></paper-progress>
                 </app-toolbar>
             </app-header>
 
-            <div class="vertical layout">
+            <template is="dom-if" if="[[!flockError]]">
+                <template is="dom-if" if="[[!flocks.results.length]]">
+                    <p class="engraved">No flocks yet.<br />Want to lead one?</p>
+                </template>
+            </template>
+            <template is="dom-if" if="[[flockError]]">
+                <p class="engraved">Problem loading flocks.<br />Check your connection?</p>
+            </template>
+
+            <div class="horizontal layout wrap">
                 <template is="dom-if" if="[[flocks.results.length]]">
                     <template is="dom-repeat" items="[[flocks.results]]">
                         <bof-card fid="[[item.id]]"
@@ -135,17 +161,18 @@
                                   on-error="onError"></bof-card>
                     </template>
                 </template>
-                <template is="dom-if" if="[[!flockError]]">
-                    <template is="dom-if" if="[[!flocks.results.length]]">
-                        <p class="engraved">No flocks yet.<br />Want to lead one?</p>
-                    </template>
-                </template>
-                <template is="dom-if" if="[[flockError]]">
-                    <p class="engraved">Problem loading flocks.<br />Check your connection?</p>
-                </template>
             </div>
+            <footer></footer>
         </app-header-layout>
 
+        
+        <paper-fab id="newButton"
+                   on-tap="onNewFlock" 
+                   alt="Start a flock"
+                   icon="add"></paper-fab>
+        <paper-tooltip for="newButton" 
+                       offset="0" 
+                       position="left">Start a flockt</paper-tooltip>
         <bof-editor id="flockEditor"
                     locations="[[locations]]"
                     on-busy="onBusy"
@@ -158,7 +185,6 @@
                      on-commit="onRefresh"
                      on-error="onError"></bof-deleter>
         <bof-login id="flockLogin"></bof-login>
-
         <paper-toast id="burntToast"></paper-toast>
     </template>
 
@@ -255,11 +281,9 @@
             onBusy: function() {
                 this._setBusyCount(this.busyCount + 1);
                 this.$.busy.disabled = false;
-                console.log('busy: busyCount', this.busyCount);
             },
 
             onIdle: function() {
-                console.log('idle: busyCount', this.busyCount);
                 this._setBusyCount(this.busyCount - 1);
                 if(this.busyCount <= 0) {
                     this._setBusyCount(0);

@@ -16,6 +16,7 @@
         <style>
             paper-card {
                 width: 100%;
+                overflow-wrap: break-word;
             }
 
             a {
@@ -25,7 +26,7 @@
                 letter-spacing: inherit;
                 line-height: inherit;
                 text-decoration: underline;
-                color: #777;
+                color: #666;
             }
 
             span {
@@ -54,17 +55,12 @@
             }
 
             .details {
-                color: #777;
+                color: #666;
                 font-size: 0.8em;
-                margin-bottom: 1em;
             }
 
             .details.birds span {
                 padding-right: 0.25em;
-            }
-
-            .details-group {
-                margin-right: 10px;
             }
 
             .card-actions {
@@ -75,7 +71,7 @@
             paper-fab {
                 --paper-fab-background: #fff;
                 --paper-fab-keyboard-focus-background: #eee;
-                color: #777;
+                color: #666;
             }
 
             paper-fab[active] {
@@ -133,21 +129,18 @@
                 </div>
                 <div class="description">[[description]]</div>
             </div>
-            <div class="card-actions">
+            <div class="card-actions vertical layout">
                 <div class="details">
-                    <span class="details-group">
-                <iron-icon icon="device:access-time"></iron-icon>
-                <span>[[when]]</span>
-                    </span>
-                    <span class="details-group">
-                <iron-icon icon="maps:place"></iron-icon>
-                <span>[[where]]</span>
-                    </span>
-                    <span class="details-group">
-                <iron-icon icon="social:person"></iron-icon>
-                <span>
-                  <a href="https://github.com/[[leader]]" target="_blank" rel="noopener noreferrer">[[leader]]</a> started the flock</span>
-                </span>
+                    <iron-icon icon="device:access-time"></iron-icon>
+                    <span>[[when]]</span>
+                </div>
+                <div class="details">
+                    <iron-icon icon="maps:place"></iron-icon>
+                    <span>[[where]]</span>
+                </div>
+                <div class="details">
+                    <iron-icon icon="social:person"></iron-icon>
+                    <span><a href="https://github.com/[[leader]]" target="_blank" rel="noopener noreferrer">[[leader]]</a> started the flock</span>
                 </div>
                 <div class="details birds">
                     <iron-icon icon="social:group"></iron-icon>
@@ -157,7 +150,7 @@
                         </template>
                     </template>
                     <template is="dom-if" if="[[!birds.length]]">
-                        <span>No one in the flock yet</span>
+                        <span>No one else has joined yet</span>
                     </template>
                 </div>
             </div>
