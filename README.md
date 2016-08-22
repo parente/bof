@@ -4,9 +4,10 @@ A web app to aid off-the-cuff planning of Birds of a Feather (BoF) sessions at a
 
 ## Run for Development
 
+NOTE: Not using conda/conda-forge at the moment because of SSL verification problems when communicating with GitHub to fetch user data. (Bad certificates package?)
+
 ```
-conda env create
-source activate bof
+pip install -r requirements.txt
 export GITHUB_CONSUMER_KEY='your app github key'
 export GITHUB_CONSUMER_SECRET='your app github secret'
 python -m bof.admin data examples
