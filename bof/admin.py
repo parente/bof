@@ -90,6 +90,8 @@ def edit(id):
         flock.name = click.prompt('Name', default=flock.name)
         flock.description = click.prompt('Description',
                                          default=flock.description)
+        flock.when = click.prompt('When', default=flock.when)
+        flock.where = click.prompt('Where', default=flock.where)
         db.session.commit()
 
 
